@@ -8,6 +8,12 @@ export class UsersService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(userData: CreateUserDto): Promise<ApiResponse> {
+    const user = await this.prismaService.user.create({
+      data: userData,
+    });
+
+    console.log(user);
+
     return {
       statusCode: HttpStatus.CREATED,
       message: 'User created',
