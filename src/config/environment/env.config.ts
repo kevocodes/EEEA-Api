@@ -5,4 +5,7 @@ export default registerAs('env', () => ({
   database: {
     url: process.env.DATABASE_URL,
   },
+  hash: {
+    rounds: parseInt(process.env.HASH_ROUNDS, 10),
+  },
 }));
