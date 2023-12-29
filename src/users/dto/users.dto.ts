@@ -5,7 +5,7 @@ import {
   IsStrongPassword,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-
+import { PartialType } from '@nestjs/mapped-types';
 export class CreateUserDto {
   @Transform(({ value }) => value.trim())
   @IsString()
@@ -29,3 +29,5 @@ export class CreateUserDto {
   @IsEmail()
   email: string;
 }
+
+export class UpdateUserDto extends PartialType(CreateUserDto) {}
