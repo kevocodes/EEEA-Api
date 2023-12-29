@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -45,6 +46,26 @@ export class UsersService {
     return {
       statusCode: HttpStatus.CREATED,
       message: 'User created',
+      data: user,
+    };
+  }
+
+  async findOneById(id: string): Promise<ApiResponse> {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    delete user.password;
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'User found',
       data: user,
     };
   }
