@@ -13,6 +13,11 @@ export class UsersController {
     return this.userService.create(body);
   }
 
+  @Get()
+  async findAll(): Promise<ApiResponse> {
+    return this.userService.findAll();
+  }
+
   @Get(':id')
   async findOneById(
     @Param('id', MongoIdPipe) id: string,

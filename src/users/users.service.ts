@@ -11,6 +11,7 @@ import { ApiResponse } from 'src/common/models/response.model';
 import envConfig from 'src/config/environment/env.config';
 import { PrismaService } from 'src/config/prisma/prisma.service';
 import { CreateUserDto } from './dto/users.dto';
+import { prismaExclude } from 'src/common/utils/exclude-arguments';
 
 @Injectable()
 export class UsersService {
@@ -47,6 +48,21 @@ export class UsersService {
       statusCode: HttpStatus.CREATED,
       message: 'User created',
       data: user,
+    };
+  }
+
+  async findAll(): Promise<ApiResponse> {
+    const users = await this.prismaService.user.findMany({
+      select: prismaExclude('User', ['password']),
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Users found',
+      data: users,
     };
   }
 
