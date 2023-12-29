@@ -8,10 +8,10 @@ import {
 import { ConfigType } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { ApiResponse } from 'src/common/models/response.model';
+import { prismaExclude } from 'src/common/utils/exclude-arguments';
 import envConfig from 'src/config/environment/env.config';
 import { PrismaService } from 'src/config/prisma/prisma.service';
-import { CreateUserDto } from './dto/users.dto';
-import { prismaExclude } from 'src/common/utils/exclude-arguments';
+import { CreateUserDto, UpdateUserDto } from './dto/users.dto';
 
 @Injectable()
 export class UsersService {
@@ -83,6 +83,67 @@ export class UsersService {
       statusCode: HttpStatus.OK,
       message: 'User found',
       data: user,
+    };
+  }
+
+  async updateOneById(
+    id: string,
+    userData: UpdateUserDto,
+  ): Promise<ApiResponse> {
+    // Check if user exists
+    const { data: user } = await this.findOneById(id);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if new email is already in use
+    if (userData.email && user.email !== userData.email) {
+      const isEmailTaken = await this.prismaService.user.findUnique({
+        where: {
+          email: userData.email,
+        },
+      });
+
+      if (isEmailTaken) {
+        throw new ConflictException('This new email is already in use');
+      }
+    }
+
+    const updatedUser = await this.prismaService.user.update({
+      where: {
+        id,
+      },
+      data: userData,
+    });
+
+    delete updatedUser.password;
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'User updated',
+      data: updatedUser,
+    };
+  }
+
+  async deleteOneById(id: string): Promise<ApiResponse> {
+    // Check if user exists
+    const { data: user } = await this.findOneById(id);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    await this.prismaService.user.delete({
+      where: {
+        id,
+      },
+    });
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'User deleted',
+      data: null,
     };
   }
 }

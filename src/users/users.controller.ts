@@ -1,7 +1,15 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiResponse } from 'src/common/models/response.model';
-import { CreateUserDto } from './dto/users.dto';
+import { CreateUserDto, UpdateUserDto } from './dto/users.dto';
 import { MongoIdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
 
 @Controller('users')
@@ -23,5 +31,18 @@ export class UsersController {
     @Param('id', MongoIdPipe) id: string,
   ): Promise<ApiResponse> {
     return this.userService.findOneById(id);
+  }
+
+  @Put(':id')
+  async update(
+    @Param('id', MongoIdPipe) id: string,
+    @Body() body: UpdateUserDto,
+  ): Promise<ApiResponse> {
+    return this.userService.updateOneById(id, body);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id', MongoIdPipe) id: string): Promise<ApiResponse> {
+    return this.userService.deleteOneById(id);
   }
 }
