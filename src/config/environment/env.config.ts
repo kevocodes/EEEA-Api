@@ -8,4 +8,8 @@ export default registerAs('env', () => ({
   hash: {
     rounds: parseInt(process.env.HASH_ROUNDS, 10),
   },
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  },
 }));

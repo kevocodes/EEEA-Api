@@ -9,10 +9,11 @@ import { ConfigType } from '@nestjs/config';
 
 import * as bcrypt from 'bcrypt';
 
-import { ApiResponse } from 'src/common/models/response.model';
-import { prismaExclude } from 'src/common/utils/exclude-arguments';
-import envConfig from 'src/config/environment/env.config';
+import { User } from '@prisma/client';
 import { PrismaService } from 'src/config/prisma/prisma.service';
+import { prismaExclude } from 'src/common/utils/exclude-arguments';
+import { ApiResponse } from 'src/common/types/response.type';
+import envConfig from 'src/config/environment/env.config';
 import { CreateUserDto, UpdateUserDto } from './dto/users.dto';
 
 @Injectable()
@@ -88,7 +89,7 @@ export class UsersService {
     };
   }
 
-  async findOneByEmail(email: string): Promise<ApiResponse> {
+  async findOneByEmail(email: string): Promise<User> {
     const user = await this.prismaService.user.findUnique({
       where: {
         email,
@@ -99,11 +100,7 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'User found',
-      data: user,
-    };
+    return user;
   }
 
   async updateOneById(

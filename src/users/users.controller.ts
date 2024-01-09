@@ -8,9 +8,9 @@ import {
   Put,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiResponse } from 'src/common/models/response.model';
+import { ApiResponse } from 'src/common/types/response.type';
 import { CreateUserDto, UpdateUserDto } from './dto/users.dto';
-import { MongoIdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
+import { MongoIdPipe } from 'src/common/pipes/mongo-id.pipe';
 
 @Controller('users')
 export class UsersController {
