@@ -6,7 +6,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
+
 import * as bcrypt from 'bcrypt';
+
 import { ApiResponse } from 'src/common/models/response.model';
 import { prismaExclude } from 'src/common/utils/exclude-arguments';
 import envConfig from 'src/config/environment/env.config';
@@ -78,6 +80,24 @@ export class UsersService {
     }
 
     delete user.password;
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'User found',
+      data: user,
+    };
+  }
+
+  async findOneByEmail(email: string): Promise<ApiResponse> {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
     return {
       statusCode: HttpStatus.OK,
