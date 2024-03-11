@@ -26,9 +26,12 @@ dependencies:
   '@nestjs/platform-express':
     specifier: ^10.0.0
     version: 10.3.0(@nestjs/common@10.3.0)(@nestjs/core@10.3.0)
+  '@nestjs/swagger':
+    specifier: ^7.3.0
+    version: 7.3.0(@nestjs/common@10.3.0)(@nestjs/core@10.3.0)(class-transformer@0.5.1)(class-validator@0.14.0)(reflect-metadata@0.1.14)
   '@prisma/client':
-    specifier: ^5.7.1
-    version: 5.7.1(prisma@5.7.1)
+    specifier: ^5.10.2
+    version: 5.10.2(prisma@5.10.2)
   '@types/bcrypt':
     specifier: ^5.0.2
     version: 5.0.2
@@ -116,8 +119,8 @@ devDependencies:
     specifier: ^3.0.0
     version: 3.1.1
   prisma:
-    specifier: ^5.7.1
-    version: 5.7.1
+    specifier: ^5.10.2
+    version: 5.10.2
   source-map-support:
     specifier: ^0.5.21
     version: 0.5.21
@@ -919,6 +922,10 @@ packages:
       - supports-color
     dev: false
 
+  /@microsoft/tsdoc@0.14.2:
+    resolution: {integrity: sha512-9b8mPpKrfeGRuhFH5iO1iwCLeIIsV6+H1sRfxbkoGXIyQE2BTsPd9zqSqQJ+pv5sJ/hT5M1zvOFL02MnEezFug==}
+    dev: false
+
   /@nestjs/cli@10.2.1:
     resolution: {integrity: sha512-CAJAQwmxFZfB3RTvqz/eaXXWpyU+mZ4QSqfBYzjneTsPgF+uyOAW3yQpaLNn9Dfcv39R9UxSuAhayv6yuFd+Jg==}
     engines: {node: '>= 16.14'}
@@ -1056,6 +1063,25 @@ packages:
       reflect-metadata: 0.1.14
     dev: false
 
+  /@nestjs/mapped-types@2.0.5(@nestjs/common@10.3.0)(class-transformer@0.5.1)(class-validator@0.14.0)(reflect-metadata@0.1.14):
+    resolution: {integrity: sha512-bSJv4pd6EY99NX9CjBIyn4TVDoSit82DUZlL4I3bqNfy5Gt+gXTa86i3I/i0iIV9P4hntcGM5GyO+FhZAhxtyg==}
+    peerDependencies:
+      '@nestjs/common': ^8.0.0 || ^9.0.0 || ^10.0.0
+      class-transformer: ^0.4.0 || ^0.5.0
+      class-validator: ^0.13.0 || ^0.14.0
+      reflect-metadata: ^0.1.12 || ^0.2.0
+    peerDependenciesMeta:
+      class-transformer:
+        optional: true
+      class-validator:
+        optional: true
+    dependencies:
+      '@nestjs/common': 10.3.0(class-transformer@0.5.1)(class-validator@0.14.0)(reflect-metadata@0.1.14)(rxjs@7.8.1)
+      class-transformer: 0.5.1
+      class-validator: 0.14.0
+      reflect-metadata: 0.1.14
+    dev: false
+
   /@nestjs/passport@10.0.3(@nestjs/common@10.3.0)(passport@0.7.0):
     resolution: {integrity: sha512-znJ9Y4S8ZDVY+j4doWAJ8EuuVO7SkQN3yOBmzxbGaXbvcSwFDAdGJ+OMCg52NdzIO4tQoN4pYKx8W6M0ArfFRQ==}
     peerDependencies:
@@ -1111,6 +1137,36 @@ packages:
     transitivePeerDependencies:
       - chokidar
     dev: true
+
+  /@nestjs/swagger@7.3.0(@nestjs/common@10.3.0)(@nestjs/core@10.3.0)(class-transformer@0.5.1)(class-validator@0.14.0)(reflect-metadata@0.1.14):
+    resolution: {integrity: sha512-zLkfKZ+ioYsIZ3dfv7Bj8YHnZMNAGWFUmx2ZDuLp/fBE4P8BSjB7hldzDueFXsmwaPL90v7lgyd82P+s7KME1Q==}
+    peerDependencies:
+      '@fastify/static': ^6.0.0 || ^7.0.0
+      '@nestjs/common': ^9.0.0 || ^10.0.0
+      '@nestjs/core': ^9.0.0 || ^10.0.0
+      class-transformer: '*'
+      class-validator: '*'
+      reflect-metadata: ^0.1.12 || ^0.2.0
+    peerDependenciesMeta:
+      '@fastify/static':
+        optional: true
+      class-transformer:
+        optional: true
+      class-validator:
+        optional: true
+    dependencies:
+      '@microsoft/tsdoc': 0.14.2
+      '@nestjs/common': 10.3.0(class-transformer@0.5.1)(class-validator@0.14.0)(reflect-metadata@0.1.14)(rxjs@7.8.1)
+      '@nestjs/core': 10.3.0(@nestjs/common@10.3.0)(@nestjs/platform-express@10.3.0)(reflect-metadata@0.1.14)(rxjs@7.8.1)
+      '@nestjs/mapped-types': 2.0.5(@nestjs/common@10.3.0)(class-transformer@0.5.1)(class-validator@0.14.0)(reflect-metadata@0.1.14)
+      class-transformer: 0.5.1
+      class-validator: 0.14.0
+      js-yaml: 4.1.0
+      lodash: 4.17.21
+      path-to-regexp: 3.2.0
+      reflect-metadata: 0.1.14
+      swagger-ui-dist: 5.11.2
+    dev: false
 
   /@nestjs/testing@10.3.0(@nestjs/common@10.3.0)(@nestjs/core@10.3.0)(@nestjs/platform-express@10.3.0):
     resolution: {integrity: sha512-8DM+bw1qASCvaEnoHUQhypCOf54+G5R21MeFBMvnSk5DtKaWVZuzDP2GjLeYCpTH19WeP6LrrjHv3rX2LKU02A==}
@@ -1175,8 +1231,8 @@ packages:
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
     dev: true
 
-  /@prisma/client@5.7.1(prisma@5.7.1):
-    resolution: {integrity: sha512-TUSa4nUcC4nf/e7X3jyO1pEd6XcI/TLRCA0KjkA46RDIpxUaRsBYEOqITwXRW2c0bMFyKcCRXrH4f7h4q9oOlg==}
+  /@prisma/client@5.10.2(prisma@5.10.2):
+    resolution: {integrity: sha512-ef49hzB2yJZCvM5gFHMxSFL9KYrIP9udpT5rYo0CsHD4P9IKj473MbhU1gjKKftiwWBTIyrt9jukprzZXazyag==}
     engines: {node: '>=16.13'}
     requiresBuild: true
     peerDependencies:
@@ -1185,35 +1241,35 @@ packages:
       prisma:
         optional: true
     dependencies:
-      prisma: 5.7.1
+      prisma: 5.10.2
     dev: false
 
-  /@prisma/debug@5.7.1:
-    resolution: {integrity: sha512-yrVSO/YZOxdeIxcBtZ5BaNqUfPrZkNsAKQIQg36cJKMxj/VYK3Vk5jMKkI+gQLl0KReo1YvX8GWKfV788SELjw==}
+  /@prisma/debug@5.10.2:
+    resolution: {integrity: sha512-bkBOmH9dpEBbMKFJj8V+Zp8IZHIBjy3fSyhLhxj4FmKGb/UBSt9doyfA6k1UeUREsMJft7xgPYBbHSOYBr8XCA==}
 
-  /@prisma/engines-version@5.7.1-1.0ca5ccbcfa6bdc81c003cf549abe4269f59c41e5:
-    resolution: {integrity: sha512-dIR5IQK/ZxEoWRBDOHF87r1Jy+m2ih3Joi4vzJRP+FOj5yxCwS2pS5SBR3TWoVnEK1zxtLI/3N7BjHyGF84fgw==}
+  /@prisma/engines-version@5.10.0-34.5a9203d0590c951969e85a7d07215503f4672eb9:
+    resolution: {integrity: sha512-uCy/++3Jx/O3ufM+qv2H1L4tOemTNqcP/gyEVOlZqTpBvYJUe0tWtW0y3o2Ueq04mll4aM5X3f6ugQftOSLdFQ==}
 
-  /@prisma/engines@5.7.1:
-    resolution: {integrity: sha512-R+Pqbra8tpLP2cvyiUpx+SIKglav3nTCpA+rn6826CThviQ8yvbNG0s8jNpo51vS9FuZO3pOkARqG062vKX7uA==}
+  /@prisma/engines@5.10.2:
+    resolution: {integrity: sha512-HkSJvix6PW8YqEEt3zHfCYYJY69CXsNdhU+wna+4Y7EZ+AwzeupMnUThmvaDA7uqswiHkgm5/SZ6/4CStjaGmw==}
     requiresBuild: true
     dependencies:
-      '@prisma/debug': 5.7.1
-      '@prisma/engines-version': 5.7.1-1.0ca5ccbcfa6bdc81c003cf549abe4269f59c41e5
-      '@prisma/fetch-engine': 5.7.1
-      '@prisma/get-platform': 5.7.1
+      '@prisma/debug': 5.10.2
+      '@prisma/engines-version': 5.10.0-34.5a9203d0590c951969e85a7d07215503f4672eb9
+      '@prisma/fetch-engine': 5.10.2
+      '@prisma/get-platform': 5.10.2
 
-  /@prisma/fetch-engine@5.7.1:
-    resolution: {integrity: sha512-9ELauIEBkIaEUpMIYPRlh5QELfoC6pyHolHVQgbNxglaINikZ9w9X7r1TIePAcm05pCNp2XPY1ObQIJW5nYfBQ==}
+  /@prisma/fetch-engine@5.10.2:
+    resolution: {integrity: sha512-dSmXcqSt6DpTmMaLQ9K8ZKzVAMH3qwGCmYEZr/uVnzVhxRJ1EbT/w2MMwIdBNq1zT69Rvh0h75WMIi0mrIw7Hg==}
     dependencies:
-      '@prisma/debug': 5.7.1
-      '@prisma/engines-version': 5.7.1-1.0ca5ccbcfa6bdc81c003cf549abe4269f59c41e5
-      '@prisma/get-platform': 5.7.1
+      '@prisma/debug': 5.10.2
+      '@prisma/engines-version': 5.10.0-34.5a9203d0590c951969e85a7d07215503f4672eb9
+      '@prisma/get-platform': 5.10.2
 
-  /@prisma/get-platform@5.7.1:
-    resolution: {integrity: sha512-eDlswr3a1m5z9D/55Iyt/nZqS5UpD+DZ9MooBB3hvrcPhDQrcf9m4Tl7buy4mvAtrubQ626ECtb8c6L/f7rGSQ==}
+  /@prisma/get-platform@5.10.2:
+    resolution: {integrity: sha512-nqXP6vHiY2PIsebBAuDeWiUYg8h8mfjBckHh6Jezuwej0QJNnjDiOq30uesmg+JXxGk99nqyG3B7wpcOODzXvg==}
     dependencies:
-      '@prisma/debug': 5.7.1
+      '@prisma/debug': 5.10.2
 
   /@sideway/address@4.1.4:
     resolution: {integrity: sha512-7vwq+rOHVWjyXxVlR76Agnvhy8I9rpzjosTESvmhNeXOXdZZB15Fl+TI9x1SiHZH5Jv2wTGduSxFDIaq0m3DUw==}
@@ -1917,7 +1973,6 @@ packages:
 
   /argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
-    dev: true
 
   /array-flatten@1.1.1:
     resolution: {integrity: sha512-PCVAQswWemu6UdxsDFFX/+gVeYqKAod3D3UVm91jHwynguOwAvYPhx8nNlM++NqRcK6CxxpUafjmhIdKiHibqg==}
@@ -3990,7 +4045,6 @@ packages:
     hasBin: true
     dependencies:
       argparse: 2.0.1
-    dev: true
 
   /jsesc@2.5.2:
     resolution: {integrity: sha512-OYu7XEzjkCQ3C5Ps3QIZsQfNpqoJyZZA99wd9aWd05NCtC5pWOkShK2mkL6HXQR6/Cy2lbNdPlZBpuQHXE63gA==}
@@ -4682,13 +4736,13 @@ packages:
       react-is: 18.2.0
     dev: true
 
-  /prisma@5.7.1:
-    resolution: {integrity: sha512-ekho7ziH0WEJvC4AxuJz+ewRTMskrebPcrKuBwcNzVDniYxx+dXOGcorNeIb9VEMO5vrKzwNYvhD271Ui2jnNw==}
+  /prisma@5.10.2:
+    resolution: {integrity: sha512-hqb/JMz9/kymRE25pMWCxkdyhbnIWrq+h7S6WysJpdnCvhstbJSNP/S6mScEcqiB8Qv2F+0R3yG+osRaWqZacQ==}
     engines: {node: '>=16.13'}
     hasBin: true
     requiresBuild: true
     dependencies:
-      '@prisma/engines': 5.7.1
+      '@prisma/engines': 5.10.2
 
   /process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
@@ -5189,6 +5243,10 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
     dev: true
+
+  /swagger-ui-dist@5.11.2:
+    resolution: {integrity: sha512-jQG0cRgJNMZ7aCoiFofnoojeSaa/+KgWaDlfgs8QN+BXoGMpxeMVY5OEnjq4OlNvF3yjftO8c9GRAgcHlO+u7A==}
+    dev: false
 
   /symbol-observable@4.0.0:
     resolution: {integrity: sha512-b19dMThMV4HVFynSAM1++gBHAbk2Tc/osgLIBZMKsyqh34jb2e8Os7T6ZW/Bt3pJFdBTd2JwAnAAEQV7rSNvcQ==}

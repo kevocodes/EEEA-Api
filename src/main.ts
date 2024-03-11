@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import debug from 'debug';
 import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 const devLogger: debug.IDebugger = debug('softbitech-ats:server');
 
@@ -17,6 +18,17 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+  const config = new DocumentBuilder()
+    .setTitle('Escuela de eduación especial - API')
+    .setDescription(
+      'API para la gestión de los sistemas de la escuela de educación especial.',
+    )
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, document);
 
   const configService = app.get(ConfigService);
   const port = configService.get('PORT');

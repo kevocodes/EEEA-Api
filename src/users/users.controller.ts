@@ -13,7 +13,10 @@ import { ApiResponse } from 'src/common/types/response.type';
 import { CreateUserDto, UpdateUserDto } from './dto/users.dto';
 import { MongoIdPipe } from 'src/common/pipes/mongo-id.pipe';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('users')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
