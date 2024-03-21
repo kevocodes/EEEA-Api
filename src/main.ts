@@ -5,7 +5,7 @@ import debug from 'debug';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-const devLogger: debug.IDebugger = debug('softbitech-ats:server');
+const devLogger: debug.IDebugger = debug('eeea-api:server');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,7 +20,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('Escuela de eduación especial - API')
+    .setTitle('Escuela de educación especial - API')
     .setDescription(
       'API para la gestión de los sistemas de la escuela de educación especial.',
     )

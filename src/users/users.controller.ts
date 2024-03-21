@@ -14,10 +14,14 @@ import { CreateUserDto, UpdateUserDto } from './dto/users.dto';
 import { MongoIdPipe } from 'src/common/pipes/mongo-id.pipe';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/role.decorator';
+import { Role } from '@prisma/client';
+import { RolesGuardGuard } from 'src/common/guards/roles-guard.guard';
 
 @ApiTags('users')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuardGuard)
+@Roles(Role.ADMIN)
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}

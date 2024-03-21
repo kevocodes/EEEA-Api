@@ -89,20 +89,6 @@ export class UsersService {
     };
   }
 
-  async findOneByEmail(email: string): Promise<User> {
-    const user = await this.prismaService.user.findUnique({
-      where: {
-        email,
-      },
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    return user;
-  }
-
   async updateOneById(
     id: string,
     userData: UpdateUserDto,
@@ -162,5 +148,22 @@ export class UsersService {
       message: 'User deleted',
       data: null,
     };
+  }
+
+  //--------------------------------
+  //  Auxiliar service methods
+  //--------------------------------
+  async findOneByEmail(email: string): Promise<User> {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 }
