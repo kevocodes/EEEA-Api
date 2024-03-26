@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiResponse } from 'src/common/types/response.type';
-import { CreateUserDto, UpdateUserDto } from './dto/users.dto';
+import { CreateUserDto, UpdateUserDto } from './dtos/users.dto';
 import { MongoIdPipe } from 'src/common/pipes/mongo-id.pipe';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';

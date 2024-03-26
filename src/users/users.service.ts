@@ -14,7 +14,7 @@ import { PrismaService } from 'src/config/prisma/prisma.service';
 import { prismaExclude } from 'src/common/utils/exclude-arguments';
 import { ApiResponse } from 'src/common/types/response.type';
 import envConfig from 'src/config/environment/env.config';
-import { CreateUserDto, UpdateUserDto } from './dto/users.dto';
+import { CreateUserDto, UpdateUserDto } from './dtos/users.dto';
 
 @Injectable()
 export class UsersService {

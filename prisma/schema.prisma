@@ -21,6 +21,35 @@ model User {
   role      Role     @default(CONTENT_MANAGER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Events    Event[]
 
   @@map("users")
+}
+
+model Event {
+  id        String       @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  datetime  DateTime
+  location  String
+  completed Boolean      @default(false)
+  thumbnail String
+  creatorId String       @db.ObjectId
+  creator   User         @relation(fields: [creatorId], references: [id])
+  images    EventImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("events")
+}
+
+model EventImage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  eventId   String   @db.ObjectId
+  event     Event    @relation(fields: [eventId], references: [id])
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("event-images")
 }
