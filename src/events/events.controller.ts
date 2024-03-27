@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -15,6 +16,7 @@ import { RolesGuardGuard } from 'src/common/guards/roles-guard.guard';
 import { EventsService } from './events.service';
 import { ApiResponse } from 'src/common/types/response.type';
 import {
+  AddEventImagesDto,
   CreateEventDto,
   UpdateEventDto,
   findAllEventsDto,
@@ -69,5 +71,24 @@ export class EventsController {
   @Delete(':id')
   async delete(@Param('id', MongoIdPipe) id: string): Promise<ApiResponse> {
     return this.eventService.delete(id);
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.CONTENT_MANAGER)
+  @Patch(':id/images')
+  async addImages(
+    @Param('id', MongoIdPipe) id: string,
+    @Body() body: AddEventImagesDto,
+  ): Promise<ApiResponse> {
+    return this.eventService.addImages(id, body.images);
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.CONTENT_MANAGER)
+  @Delete('/images/:imageId')
+  async deleteImage(
+    @Param('imageId', MongoIdPipe) imageId: string,
+  ): Promise<ApiResponse> {
+    return this.eventService.deleteImage(imageId);
   }
 }

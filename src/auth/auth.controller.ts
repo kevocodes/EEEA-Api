@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -26,7 +27,11 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginInfo: LoginDto): Promise<ApiResponse> {
+  async login(
+    @Body() loginInfo: LoginDto,
+    @Req() req: Request,
+  ): Promise<ApiResponse> {
+    console.log(req.headers);
     return await this.authService.login(loginInfo);
   }
 

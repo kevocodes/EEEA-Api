@@ -1,6 +1,7 @@
 import { PartialType } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
+  ArrayMinSize,
   IsBoolean,
   IsISO8601,
   IsNotEmpty,
@@ -60,4 +61,10 @@ export class findAllEventsDto {
   @IsOptional()
   @Transform(({ value }) => value === 'true')
   groupedByMonth?: boolean;
+}
+
+export class AddEventImagesDto {
+  @IsUrl({}, { each: true })
+  @ArrayMinSize(1)
+  images: string[];
 }

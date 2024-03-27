@@ -78,6 +78,14 @@ export class EventsService {
       orderBy: {
         datetime: 'asc',
       },
+      include: {
+        images: {
+          select: {
+            id: true,
+            url: true,
+          },
+        },
+      },
     });
 
     return {
@@ -102,6 +110,12 @@ export class EventsService {
             name: true,
             lastname: true,
             email: true,
+          },
+        },
+        images: {
+          select: {
+            id: true,
+            url: true,
           },
         },
       },
@@ -156,6 +170,50 @@ export class EventsService {
     return {
       statusCode: HttpStatus.OK,
       message: 'Event deleted successfully',
+      data: null,
+    };
+  }
+
+  async addImages(id: string, images: string[]): Promise<ApiResponse> {
+    const { data } = await this.findOne(id);
+    const event = data as Event;
+
+    if (!event.completed)
+      throw new BadRequestException('Event is not completed');
+
+    const eventImages = await this.prismaService.eventImage.createMany({
+      data: images.map((image) => ({
+        eventId: id,
+        url: image,
+      })),
+    });
+
+    return {
+      statusCode: HttpStatus.CREATED,
+      data: eventImages,
+      message: 'Images added successfully',
+    };
+  }
+
+  async deleteImage(imageId: string): Promise<ApiResponse> {
+    // Check if the image exists
+    const image = await this.prismaService.eventImage.findUnique({
+      where: {
+        id: imageId,
+      },
+    });
+
+    if (!image) throw new BadRequestException('Image not found');
+
+    await this.prismaService.eventImage.delete({
+      where: {
+        id: imageId,
+      },
+    });
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Image deleted successfully',
       data: null,
     };
   }
