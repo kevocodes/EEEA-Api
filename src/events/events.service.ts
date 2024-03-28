@@ -1,5 +1,5 @@
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
-import { Event } from '@prisma/client';
+import { Event, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/config/prisma/prisma.service';
 import {
   CreateEventDto,
@@ -43,8 +43,14 @@ export class EventsService {
       startMonth,
       endMonth,
       groupedByMonth,
+      completed,
     } = query;
 
+    const whereOptions: Prisma.EventWhereInput = {};
+
+    /*-----------------------------
+      Date range query validation
+      ----------------------------- */
     const monthRangeProvided = startMonth && endMonth;
     const isValidMonthRange = endMonth >= startMonth;
     const isSameMonth = startMonth === endMonth;
@@ -52,29 +58,32 @@ export class EventsService {
     if (monthRangeProvided && !isValidMonthRange)
       throw new BadRequestException('Invalid month range');
 
-    // If the month range is provided and the start and end month are the same or if the month range is not provided, we group by month
-    const defaultGroupByMonth = !monthRangeProvided || !isSameMonth;
-
-    // If groupedByMonth is provided, we use it, otherwise we use the default behavior
-    const isGroupByMonth = groupedByMonth ?? defaultGroupByMonth;
-
     // By default, we get all events for the year
     let startOfYear = dayjs().year(year).startOf('year');
     let endOfYear = dayjs().year(year).endOf('year');
 
-    // If startMonth and endMonth are provided, we filter the events
+    // If startMonth and endMonth query params are provided, we filter the events using the month range
     if (monthRangeProvided) {
       startOfYear = startOfYear.month(startMonth - 1).startOf('month');
       endOfYear = endOfYear.month(endMonth - 1).endOf('month');
     }
 
+    // Add the datetime range to the prisma whereOptions
+    whereOptions.datetime = {
+      gte: startOfYear.toDate(),
+      lte: endOfYear.toDate(),
+    };
+
+    /*-----------------------------
+      Status query validation
+      ----------------------------- */
+    if (completed !== undefined) {
+      // If the status query param is provided, we filter the events by status
+      whereOptions.completed = completed;
+    }
+
     const events = await this.prismaService.event.findMany({
-      where: {
-        datetime: {
-          gte: startOfYear.toDate(),
-          lte: endOfYear.toDate(),
-        },
-      },
+      where: whereOptions,
       orderBy: {
         datetime: 'asc',
       },
@@ -87,6 +96,15 @@ export class EventsService {
         },
       },
     });
+
+    /*-------------------------------
+      groupByMonth query validation
+      ------------------------------- */
+    // If the month range is provided and the startMonth and endMonth are the same or if the month range is not provided, we group by month by default
+    const defaultGroupByMonth = !monthRangeProvided || !isSameMonth;
+
+    // If groupedByMonth query param is provided, we use it to filter, otherwise we use the default behavior
+    const isGroupByMonth = groupedByMonth ?? defaultGroupByMonth;
 
     return {
       statusCode: HttpStatus.OK,

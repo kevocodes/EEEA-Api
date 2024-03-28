@@ -61,6 +61,11 @@ export class findAllEventsDto {
   @IsOptional()
   @Transform(({ value }) => value === 'true')
   groupedByMonth?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true')
+  completed?: boolean;
 }
 
 export class AddEventImagesDto {
