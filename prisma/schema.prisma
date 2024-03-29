@@ -67,3 +67,13 @@ model EventImage {
 
   @@map("event-images")
 }
+
+model Installation {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("installations")
+}

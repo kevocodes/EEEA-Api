@@ -1,4 +1,9 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/config/prisma/prisma.service';
 import {
   CreateActivityDto,
@@ -140,7 +145,7 @@ export class ActivitiesService {
       },
     });
 
-    if (!activity) throw new BadRequestException('Activity not found');
+    if (!activity) throw new NotFoundException('Activity not found');
 
     return {
       statusCode: HttpStatus.OK,

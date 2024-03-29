@@ -1,4 +1,9 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Event, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/config/prisma/prisma.service';
 import {
@@ -136,7 +141,7 @@ export class EventsService {
       },
     });
 
-    if (!event) throw new BadRequestException('Event not found');
+    if (!event) throw new NotFoundException('Event not found');
 
     return {
       statusCode: HttpStatus.OK,
