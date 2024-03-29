@@ -1,49 +1,51 @@
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
-import { Event, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/config/prisma/prisma.service';
 import {
-  CreateEventDto,
-  UpdateEventDto,
-  findAllEventsDto,
-} from './dtos/events.dto';
+  CreateActivityDto,
+  UpdateActivityDto,
+  FindAllActivitiesDto,
+} from './dtos/acitivities.dto';
 import { ApiResponse } from 'src/common/types/response.type';
-
 import * as dayjs from 'dayjs';
+import { Activity, Prisma } from '@prisma/client';
 
 @Injectable()
-export class EventsService {
+export class ActivitiesService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(data: CreateEventDto, creatorId: string): Promise<ApiResponse> {
+  async create(
+    data: CreateActivityDto,
+    creatorId: string,
+  ): Promise<ApiResponse> {
     const isInvalidDate = dayjs(data.datetime).isBefore(dayjs());
 
     if (isInvalidDate)
       throw new BadRequestException('The date must be in the future');
 
-    const event = await this.prismaService.event.create({
+    const activity = await this.prismaService.activity.create({
       data: {
-        ...data,
+        title: data.title,
+        datetime: data.datetime,
         creatorId,
       },
     });
 
     return {
       statusCode: HttpStatus.CREATED,
-      data: event,
-      message: 'Event created successfully',
+      data: activity,
+      message: 'Activity created successfully',
     };
   }
 
-  async findAll(query: findAllEventsDto): Promise<ApiResponse> {
+  async findAll(query: FindAllActivitiesDto): Promise<ApiResponse> {
     const {
       year = dayjs().year(),
       startMonth,
       endMonth,
       groupedByMonth,
-      completed,
     } = query;
 
-    const whereOptions: Prisma.EventWhereInput = {};
+    const whereOptions: Prisma.ActivityWhereInput = {};
 
     /*-----------------------------
       Date range query validation
@@ -55,11 +57,11 @@ export class EventsService {
     if (monthRangeProvided && !isValidMonthRange)
       throw new BadRequestException('Invalid month range');
 
-    // By default, we get all events for the year
+    // By default, we get all activities for the year
     let startOfYear = dayjs().year(year).startOf('year');
     let endOfYear = dayjs().year(year).endOf('year');
 
-    // If startMonth and endMonth query params are provided, we filter the events using the month range
+    // If startMonth and endMonth query params are provided, we filter the activities using the month range
     if (monthRangeProvided) {
       startOfYear = startOfYear.month(startMonth - 1).startOf('month');
       endOfYear = endOfYear.month(endMonth - 1).endOf('month');
@@ -71,26 +73,10 @@ export class EventsService {
       lte: endOfYear.toDate(),
     };
 
-    /*-----------------------------
-      Status query validation
-      ----------------------------- */
-    if (completed !== undefined) {
-      // If the status query param is provided, we filter the events by status
-      whereOptions.completed = completed;
-    }
-
-    const events = await this.prismaService.event.findMany({
+    const activities = await this.prismaService.activity.findMany({
       where: whereOptions,
       orderBy: {
         datetime: 'asc',
-      },
-      include: {
-        images: {
-          select: {
-            id: true,
-            url: true,
-          },
-        },
       },
     });
 
@@ -107,14 +93,38 @@ export class EventsService {
       statusCode: HttpStatus.OK,
       data: {
         isGrouped: isGroupByMonth,
-        events: isGroupByMonth ? this.groupByMonth(events) : events,
+        events: isGroupByMonth ? this.groupByMonth(activities) : activities,
       },
       message: 'Events retrieved successfully',
     };
   }
 
+  async findAllByMonth(month: number): Promise<ApiResponse> {
+    const startOfMonth = dayjs()
+      .month(month - 1)
+      .startOf('month');
+    const endOfMonth = dayjs()
+      .month(month - 1)
+      .endOf('month');
+
+    const activities = await this.prismaService.activity.findMany({
+      where: {
+        datetime: {
+          gte: startOfMonth.toDate(),
+          lte: endOfMonth.toDate(),
+        },
+      },
+    });
+
+    return {
+      statusCode: HttpStatus.OK,
+      data: activities,
+      message: 'Activities retrieved successfully',
+    };
+  }
+
   async findOne(id: string): Promise<ApiResponse> {
-    const event = await this.prismaService.event.findUnique({
+    const activity = await this.prismaService.activity.findUnique({
       where: {
         id,
       },
@@ -127,26 +137,20 @@ export class EventsService {
             email: true,
           },
         },
-        images: {
-          select: {
-            id: true,
-            url: true,
-          },
-        },
       },
     });
 
-    if (!event) throw new BadRequestException('Event not found');
+    if (!activity) throw new BadRequestException('Activity not found');
 
     return {
       statusCode: HttpStatus.OK,
-      data: event,
-      message: 'Event retrieved successfully',
+      data: activity,
+      message: 'Activity retrieved successfully',
     };
   }
 
-  async update(id: string, data: UpdateEventDto): Promise<ApiResponse> {
-    // Check if the event exists
+  async update(id: string, data: UpdateActivityDto): Promise<ApiResponse> {
+    // Check if the activity exists
     await this.findOne(id);
 
     if (data.datetime) {
@@ -156,7 +160,7 @@ export class EventsService {
         throw new BadRequestException('The date must be in the future');
     }
 
-    const event = await this.prismaService.event.update({
+    const activity = await this.prismaService.activity.update({
       where: {
         id,
       },
@@ -165,16 +169,16 @@ export class EventsService {
 
     return {
       statusCode: HttpStatus.OK,
-      data: event,
+      data: activity,
       message: 'Event updated successfully',
     };
   }
 
   async delete(id: string): Promise<ApiResponse> {
-    // Check if the event exists
+    // Check if the activity exists
     await this.findOne(id);
 
-    await this.prismaService.event.delete({
+    await this.prismaService.activity.delete({
       where: {
         id,
       },
@@ -182,51 +186,7 @@ export class EventsService {
 
     return {
       statusCode: HttpStatus.OK,
-      message: 'Event deleted successfully',
-      data: null,
-    };
-  }
-
-  async addImages(id: string, images: string[]): Promise<ApiResponse> {
-    const { data } = await this.findOne(id);
-    const event = data as Event;
-
-    if (!event.completed)
-      throw new BadRequestException('Event is not completed');
-
-    const eventImages = await this.prismaService.eventImage.createMany({
-      data: images.map((image) => ({
-        eventId: id,
-        url: image,
-      })),
-    });
-
-    return {
-      statusCode: HttpStatus.CREATED,
-      data: eventImages,
-      message: 'Images added successfully',
-    };
-  }
-
-  async deleteImage(imageId: string): Promise<ApiResponse> {
-    // Check if the image exists
-    const image = await this.prismaService.eventImage.findUnique({
-      where: {
-        id: imageId,
-      },
-    });
-
-    if (!image) throw new BadRequestException('Image not found');
-
-    await this.prismaService.eventImage.delete({
-      where: {
-        id: imageId,
-      },
-    });
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Image deleted successfully',
+      message: 'Activity deleted successfully',
       data: null,
     };
   }
@@ -234,15 +194,15 @@ export class EventsService {
   //--------------------------------
   //  Auxiliar service methods
   //--------------------------------
-  private groupByMonth(events: Event[]): Record<string, Event[]> {
-    return events.reduce((acc, event) => {
-      const month = dayjs(event.datetime).format('MMMM');
+  private groupByMonth(activities: Activity[]): Record<string, Activity[]> {
+    return activities.reduce((acc, activity) => {
+      const month = dayjs(activity.datetime).format('MMMM');
 
       if (!acc[month]) {
         acc[month] = [];
       }
 
-      acc[month].push(event);
+      acc[month].push(activity);
 
       return acc;
     }, {});
