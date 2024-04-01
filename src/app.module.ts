@@ -5,7 +5,16 @@ import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
 import { ActivitiesModule } from './activities/activities.module';
 import { InstallationsModule } from './installations/installations.module';
+import { MailModule } from './mail/mail.module';
 @Module({
-  imports: [AuthModule, ConfigModule, UsersModule, EventsModule, ActivitiesModule, InstallationsModule],
+  imports: [
+    AuthModule,
+    ConfigModule,
+    UsersModule,
+    EventsModule,
+    ActivitiesModule,
+    InstallationsModule,
+    MailModule,
+  ],
 })
 export class AppModule {}
