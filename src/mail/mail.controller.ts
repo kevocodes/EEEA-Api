@@ -1,11 +1,9 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { MailService } from './mail.service';
 import { ApiResponse } from 'src/common/types/response.type';
 import { ContactUsDto } from './dtos/contact-us.dto';
-import { ThrottlerGuard } from '@nestjs/throttler';
 
-@UseGuards(ThrottlerGuard)
 @ApiTags('mail')
 @Controller('mail')
 export class MailController {

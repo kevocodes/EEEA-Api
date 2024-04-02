@@ -15,4 +15,6 @@ export default Joi.object({
   SMTP_CONTACT_US_EMAIL: Joi.string().required(),
   RATE_LIMIT_EMAIL_TTL: Joi.number().required(),
   RATE_LIMIT_EMAIL_LIMIT: Joi.number().required(),
+  RATE_LIMIT_DEFAULT_TTL: Joi.number().required(),
+  RATE_LIMIT_DEFAULT_LIMIT: Joi.number().required(),
 });

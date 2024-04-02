@@ -6,7 +6,6 @@ import { join } from 'path';
 import { MailerModule } from '@nestjs-modules/mailer';
 import envConfig from 'src/config/environment/env.config';
 import { ConfigType } from '@nestjs/config';
-import { ThrottlerModule, seconds } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -33,15 +32,6 @@ import { ThrottlerModule, seconds } from '@nestjs/throttler';
           },
         },
       }),
-    }),
-    ThrottlerModule.forRootAsync({
-      inject: [envConfig.KEY],
-      useFactory: (configService: ConfigType<typeof envConfig>) => [
-        {
-          limit: configService.rateLimit.email.limit,
-          ttl: seconds(configService.rateLimit.email.ttl),
-        },
-      ],
     }),
   ],
   providers: [MailService],

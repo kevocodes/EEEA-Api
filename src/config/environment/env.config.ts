@@ -2,6 +2,10 @@ import { registerAs } from '@nestjs/config';
 
 export default registerAs('env', () => ({
   rateLimit: {
+    default: {
+      ttl: parseInt(process.env.RATE_LIMIT_DEFAULT_TTL, 10),
+      limit: parseInt(process.env.RATE_LIMIT_DEFAULT_LIMIT, 10),
+    },
     email: {
       ttl: parseInt(process.env.RATE_LIMIT_EMAIL_TTL, 10),
       limit: parseInt(process.env.RATE_LIMIT_EMAIL_LIMIT, 10),
