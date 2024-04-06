@@ -17,4 +17,7 @@ export default Joi.object({
   RATE_LIMIT_EMAIL_LIMIT: Joi.number().required(),
   RATE_LIMIT_DEFAULT_TTL: Joi.number().required(),
   RATE_LIMIT_DEFAULT_LIMIT: Joi.number().required(),
+  CLOUDINARY_NAME: Joi.string().required(),
+  CLOUDINARY_API_KEY: Joi.string().required(),
+  CLOUDINARY_API_SECRET: Joi.string().required(),
 });

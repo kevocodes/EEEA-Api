@@ -35,4 +35,9 @@ export default registerAs('env', () => ({
     },
     contactUsEmail: process.env.SMTP_CONTACT_US_EMAIL,
   },
+  cloudinary: {
+    name: process.env.CLOUDINARY_NAME,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    apiSecret: process.env.CLOUDINARY_API_SECRET,
+  },
 }));

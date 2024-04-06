@@ -6,9 +6,11 @@ import {
   Param,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuardGuard } from 'src/common/guards/roles-guard.guard';
 import { InstallationsService } from './installations.service';
@@ -21,6 +23,9 @@ import {
 } from './dtos/installations.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 import { MongoIdPipe } from 'src/common/pipes/mongo-id.pipe';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
+import { getParseImagePipe } from 'src/common/utils/get-parse-file-pipe';
 
 @ApiTags('installations')
 @Controller('installations')
@@ -30,9 +35,28 @@ export class InstallationsController {
 
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.CONTENT_MANAGER)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file', 'name'],
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+        name: { type: 'string' },
+      },
+    },
+  })
   @Post()
-  async create(@Body() body: CreateInstallationDto): Promise<ApiResponse> {
-    return this.installationsService.create(body);
+  async create(
+    @UploadedFile(getParseImagePipe())
+    file: Express.Multer.File,
+    @Body() body: CreateInstallationDto,
+  ): Promise<ApiResponse> {
+    return this.installationsService.create(file, body);
   }
 
   @Public()
@@ -49,12 +73,28 @@ export class InstallationsController {
 
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.CONTENT_MANAGER)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+        name: { type: 'string' },
+      },
+    },
+  })
   @Put(':id')
   async update(
+    @UploadedFile(getParseImagePipe())
+    file: Express.Multer.File,
     @Param('id', MongoIdPipe) id: string,
     @Body() body: UpdateInstallationDto,
   ): Promise<ApiResponse> {
-    return this.installationsService.update(id, body);
+    return this.installationsService.update(id, body, file);
   }
 
   @ApiBearerAuth()
