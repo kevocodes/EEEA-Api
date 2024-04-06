@@ -89,7 +89,7 @@ export class InstallationsController {
   })
   @Put(':id')
   async update(
-    @UploadedFile(getParseImagePipe())
+    @UploadedFile(getParseImagePipe({ required: false }))
     file: Express.Multer.File,
     @Param('id', MongoIdPipe) id: string,
     @Body() body: UpdateInstallationDto,

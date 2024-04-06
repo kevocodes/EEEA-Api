@@ -5,7 +5,13 @@ import {
 } from '@nestjs/common';
 import { megBytesToBytes } from './bytes-to-mb';
 
-export const getParseImagePipe = (): ParseFilePipe => {
+interface ParseImagePipeOptions {
+  required?: boolean;
+}
+
+export function getParseImagePipe({
+  required = true,
+}: ParseImagePipeOptions = {}): ParseFilePipe {
   return new ParseFilePipeBuilder()
     .addFileTypeValidator({
       fileType: '.(png|jpeg|jpg|webp)',
@@ -16,5 +22,6 @@ export const getParseImagePipe = (): ParseFilePipe => {
     })
     .build({
       errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+      fileIsRequired: required,
     });
-};
+}
