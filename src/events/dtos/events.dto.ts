@@ -1,13 +1,11 @@
 import { PartialType } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
-  ArrayMinSize,
   IsBoolean,
   IsISO8601,
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUrl,
   Max,
   Min,
   ValidateIf,
@@ -27,15 +25,14 @@ export class CreateEventDto {
   @IsString()
   @IsNotEmpty()
   location: string;
-
-  @IsUrl()
-  thumbnail: string;
 }
 
-export class UpdateEventDto extends PartialType(CreateEventDto) {
+export class UpdateEventDto extends PartialType(CreateEventDto) {}
+
+export class UpdateEventStatusDto {
   @IsBoolean()
-  @IsOptional()
-  completed?: boolean;
+  @IsNotEmpty()
+  completed: boolean;
 }
 
 export class findAllEventsDto {
@@ -66,10 +63,4 @@ export class findAllEventsDto {
   @IsOptional()
   @Transform(({ value }) => value === 'true')
   completed?: boolean;
-}
-
-export class AddEventImagesDto {
-  @IsUrl({}, { each: true })
-  @ArrayMinSize(1)
-  images: string[];
 }

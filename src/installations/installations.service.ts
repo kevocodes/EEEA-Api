@@ -7,6 +7,7 @@ import {
 import { ApiResponse } from 'src/common/types/response.type';
 import { CloudinaryService } from 'src/config/cloudinary/cloudinary.service';
 import { Installation } from '@prisma/client';
+import { InstallationImageInfo } from './types/installation.types';
 
 @Injectable()
 export class InstallationsService {
@@ -19,7 +20,10 @@ export class InstallationsService {
     file: Express.Multer.File,
     data: CreateInstallationDto,
   ): Promise<ApiResponse> {
-    const upload = await this.cloudinaryService.uploadFile(file);
+    const upload = await this.cloudinaryService.uploadFile(
+      file,
+      'installations',
+    );
 
     const installation = await this.prismaService.installation.create({
       data: {
@@ -69,36 +73,30 @@ export class InstallationsService {
   ): Promise<ApiResponse> {
     // Check if the installation exists
     const result = await this.findOne(id);
-    const prevInstallation: Installation = result.data;
 
-    let updatedInstallation: Installation;
+    const currentInstallation: Installation = result.data;
+    const imageInfo: InstallationImageInfo = {};
 
+    // If a new image is provided, upload the new image and delete the previous one
     if (file) {
-      // Upload the new installation image and delete the previous one
       const [upload] = await Promise.all([
-        this.cloudinaryService.uploadFile(file),
-        this.cloudinaryService.deleteFiles([prevInstallation.public_id]),
+        this.cloudinaryService.uploadFile(file, 'installations'),
+        this.cloudinaryService.deleteFiles([currentInstallation.public_id]),
       ]);
 
-      // Update the installation with the new image details
-      updatedInstallation = await this.prismaService.installation.update({
-        where: {
-          id,
-        },
-        data: {
-          name: data.name,
-          public_id: upload.public_id,
-          url: upload.secure_url,
-        },
-      });
+      // Assign the new image info to the imageInfo
+      imageInfo.url = upload.secure_url;
+      imageInfo.public_id = upload.public_id;
     }
 
-    // If file is not provided, update the installation without changing the image
-    updatedInstallation = await this.prismaService.installation.update({
+    const updatedInstallation = await this.prismaService.installation.update({
       where: {
         id,
       },
-      data,
+      data: {
+        ...data,
+        ...imageInfo,
+      },
     });
 
     return {

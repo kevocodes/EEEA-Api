@@ -7,18 +7,20 @@ import { megBytesToBytes } from './bytes-to-mb';
 
 interface ParseImagePipeOptions {
   required?: boolean;
+  maxSize?: number;
 }
 
 export function getParseImagePipe({
   required = true,
+  maxSize = 1.5,
 }: ParseImagePipeOptions = {}): ParseFilePipe {
   return new ParseFilePipeBuilder()
     .addFileTypeValidator({
       fileType: '.(png|jpeg|jpg|webp)',
     })
     .addMaxSizeValidator({
-      maxSize: megBytesToBytes(1.5),
-      message: 'File size must be less than 1.5 MB',
+      maxSize: megBytesToBytes(maxSize),
+      message: `File size must be less than ${maxSize} MB`,
     })
     .build({
       errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,

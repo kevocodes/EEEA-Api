@@ -7,13 +7,16 @@ const streamifier = require('streamifier');
 
 @Injectable()
 export class CloudinaryService {
-  async uploadFile(file: Express.Multer.File): Promise<CloudinaryResponse> {
+  async uploadFile(
+    file: Express.Multer.File,
+    folder: string,
+  ): Promise<CloudinaryResponse> {
     const webpBuffer = await sharp(file.buffer).webp().toBuffer();
 
     return new Promise<CloudinaryResponse>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: 'installations',
+          folder,
         },
         (error, result) => {
           if (error) return reject(error);
@@ -23,6 +26,15 @@ export class CloudinaryService {
 
       streamifier.createReadStream(webpBuffer).pipe(uploadStream);
     });
+  }
+
+  async uploadFiles(
+    files: Express.Multer.File[],
+    folder: string,
+  ): Promise<CloudinaryResponse[]> {
+    const uploads = files.map((file) => this.uploadFile(file, folder));
+
+    return Promise.all(uploads);
   }
 
   async deleteFiles(publicIds: string[]): Promise<any> {

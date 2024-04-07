@@ -9,25 +9,39 @@ import { PrismaService } from 'src/config/prisma/prisma.service';
 import {
   CreateEventDto,
   UpdateEventDto,
+  UpdateEventStatusDto,
   findAllEventsDto,
 } from './dtos/events.dto';
 import { ApiResponse } from 'src/common/types/response.type';
-
+import { Express } from 'express';
 import * as dayjs from 'dayjs';
+import { CloudinaryService } from 'src/config/cloudinary/cloudinary.service';
+import { EventImageInfo } from './types/events.types';
 
 @Injectable()
 export class EventsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
-  async create(data: CreateEventDto, creatorId: string): Promise<ApiResponse> {
+  async create(
+    data: CreateEventDto,
+    file: Express.Multer.File,
+    creatorId: string,
+  ): Promise<ApiResponse> {
     const isInvalidDate = dayjs(data.datetime).isBefore(dayjs());
 
     if (isInvalidDate)
       throw new BadRequestException('The date must be in the future');
 
+    const upload = await this.cloudinaryService.uploadFile(file, 'events');
+
     const event = await this.prismaService.event.create({
       data: {
         ...data,
+        thumbnail: upload.secure_url,
+        public_id: upload.public_id,
         creatorId,
       },
     });
@@ -150,10 +164,18 @@ export class EventsService {
     };
   }
 
-  async update(id: string, data: UpdateEventDto): Promise<ApiResponse> {
+  async update(
+    id: string,
+    data: UpdateEventDto,
+    file: Express.Multer.File,
+  ): Promise<ApiResponse> {
     // Check if the event exists
-    await this.findOne(id);
+    const result = await this.findOne(id);
 
+    const currentEvent: Event = result.data;
+    const imageInfo: EventImageInfo = {};
+
+    // Check if the date is in the future
     if (data.datetime) {
       const isInvalidDate = dayjs(data.datetime).isBefore(dayjs());
 
@@ -161,7 +183,43 @@ export class EventsService {
         throw new BadRequestException('The date must be in the future');
     }
 
-    const event = await this.prismaService.event.update({
+    // If a new thumbnail is provided, we upload the new image and delete the previous one
+    if (file) {
+      const [upload] = await Promise.all([
+        this.cloudinaryService.uploadFile(file, 'events'),
+        this.cloudinaryService.deleteFiles([currentEvent.public_id]),
+      ]);
+
+      // Add the new image info to the imageInfo
+      imageInfo.thumbnail = upload.secure_url;
+      imageInfo.public_id = upload.public_id;
+    }
+
+    const updatedEvent = await this.prismaService.event.update({
+      where: {
+        id,
+      },
+      data: {
+        ...data,
+        ...imageInfo,
+      },
+    });
+
+    return {
+      statusCode: HttpStatus.OK,
+      data: updatedEvent,
+      message: 'Event updated successfully',
+    };
+  }
+
+  async updateStatus(
+    id: string,
+    data: UpdateEventStatusDto,
+  ): Promise<ApiResponse> {
+    // Check if the event exists
+    await this.findOne(id);
+
+    const updatedEvent = await this.prismaService.event.update({
       where: {
         id,
       },
@@ -170,20 +228,24 @@ export class EventsService {
 
     return {
       statusCode: HttpStatus.OK,
-      data: event,
-      message: 'Event updated successfully',
+      data: updatedEvent,
+      message: 'Event status updated successfully',
     };
   }
 
   async delete(id: string): Promise<ApiResponse> {
     // Check if the event exists
-    await this.findOne(id);
+    const event = await this.findOne(id);
+    const data = event.data as Event;
 
-    await this.prismaService.event.delete({
-      where: {
-        id,
-      },
-    });
+    await Promise.all([
+      this.cloudinaryService.deleteFiles([data.public_id]),
+      this.prismaService.event.delete({
+        where: {
+          id,
+        },
+      }),
+    ]);
 
     return {
       statusCode: HttpStatus.OK,
@@ -192,24 +254,35 @@ export class EventsService {
     };
   }
 
-  async addImages(id: string, images: string[]): Promise<ApiResponse> {
+  async addImages(
+    id: string,
+    images: Array<Express.Multer.File>,
+  ): Promise<ApiResponse> {
     const { data } = await this.findOne(id);
     const event = data as Event;
 
     if (!event.completed)
       throw new BadRequestException('Event is not completed');
 
+    const uploads = await this.cloudinaryService.uploadFiles(
+      images,
+      'events/images',
+    );
+
     const eventImages = await this.prismaService.eventImage.createMany({
-      data: images.map((image) => ({
+      data: uploads.map((image) => ({
         eventId: id,
-        url: image,
+        url: image.secure_url,
+        public_id: image.public_id,
       })),
     });
 
     return {
       statusCode: HttpStatus.CREATED,
-      data: eventImages,
-      message: 'Images added successfully',
+      message: `${eventImages.count} ${
+        eventImages.count === 1 ? 'image' : 'images'
+      } added successfully`,
+      data: null,
     };
   }
 
@@ -223,15 +296,49 @@ export class EventsService {
 
     if (!image) throw new BadRequestException('Image not found');
 
-    await this.prismaService.eventImage.delete({
-      where: {
-        id: imageId,
-      },
-    });
+    await Promise.all([
+      this.cloudinaryService.deleteFiles([image.public_id]),
+      this.prismaService.eventImage.delete({
+        where: {
+          id: imageId,
+        },
+      }),
+    ]);
 
     return {
       statusCode: HttpStatus.OK,
       message: 'Image deleted successfully',
+      data: null,
+    };
+  }
+
+  async deleteAllImages(eventId: string): Promise<ApiResponse> {
+    // Check if the event exists
+    await this.findOne(eventId);
+
+    const images = await this.prismaService.eventImage.findMany({
+      where: {
+        eventId,
+      },
+      select: {
+        public_id: true,
+      },
+    });
+
+    const publicIds = images.map((image) => image.public_id);
+
+    await Promise.all([
+      this.cloudinaryService.deleteFiles(publicIds),
+      this.prismaService.eventImage.deleteMany({
+        where: {
+          eventId,
+        },
+      }),
+    ]);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'All images deleted successfully',
       data: null,
     };
   }
@@ -241,7 +348,7 @@ export class EventsService {
   //--------------------------------
   private groupByMonth(events: Event[]): Record<string, Event[]> {
     return events.reduce((acc, event) => {
-      const month = dayjs(event.datetime).format('MMMM');
+      const month = dayjs(event.datetime).format('MMMM').toLowerCase();
 
       if (!acc[month]) {
         acc[month] = [];
