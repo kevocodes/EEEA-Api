@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   HttpStatus,
   Inject,
@@ -9,12 +10,13 @@ import { ConfigType } from '@nestjs/config';
 
 import * as bcrypt from 'bcrypt';
 
-import { User } from '@prisma/client';
+import { User, Role } from '@prisma/client';
 import { PrismaService } from 'src/config/prisma/prisma.service';
 import { prismaExclude } from 'src/common/utils/exclude-arguments';
 import { ApiResponse } from 'src/common/types/response.type';
 import envConfig from 'src/config/environment/env.config';
 import { CreateUserDto, UpdateUserDto } from './dtos/users.dto';
+import { TokenPayload } from 'src/auth/types/token.type';
 
 @Injectable()
 export class UsersService {
@@ -39,6 +41,7 @@ export class UsersService {
       userData.password,
       this.config.hash.rounds,
     );
+
     userData.password = hashedPassword;
 
     const user = await this.prismaService.user.create({
@@ -92,7 +95,12 @@ export class UsersService {
   async updateOneById(
     id: string,
     userData: UpdateUserDto,
+    currentUser: TokenPayload,
   ): Promise<ApiResponse> {
+    if (currentUser.role === Role.CONTENT_MANAGER && currentUser.sub !== id) {
+      throw new BadRequestException('You can only update your own user');
+    }
+
     // Check if user exists
     const { data: user } = await this.findOneById(id);
 
@@ -101,7 +109,7 @@ export class UsersService {
     }
 
     // Check if new email is already in use
-    if (userData.email && user.email !== userData.email) {
+    if (userData.email && userData.email !== user.email) {
       const isEmailTaken = await this.prismaService.user.findUnique({
         where: {
           email: userData.email,
@@ -111,6 +119,15 @@ export class UsersService {
       if (isEmailTaken) {
         throw new ConflictException('This new email is already in use');
       }
+    }
+
+    if (userData.password) {
+      const hashedPassword = await bcrypt.hash(
+        userData.password,
+        this.config.hash.rounds,
+      );
+
+      userData.password = hashedPassword;
     }
 
     const updatedUser = await this.prismaService.user.update({
@@ -159,10 +176,6 @@ export class UsersService {
         email,
       },
     });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
 
     return user;
   }
