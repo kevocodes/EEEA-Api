@@ -36,11 +36,14 @@ export class AuthService {
 
     const access_token = this.jwtService.sign(payload);
 
+    delete user.password;
+
     return {
       statusCode: 200,
       message: 'Login successfully',
       data: {
         access_token,
+        user,
       },
     };
   }
