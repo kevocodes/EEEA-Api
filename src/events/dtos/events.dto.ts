@@ -2,6 +2,7 @@ import { PartialType } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsEnum,
   IsISO8601,
   IsNotEmpty,
   IsOptional,
@@ -63,4 +64,8 @@ export class findAllEventsDto {
   @IsOptional()
   @Transform(({ value }) => value === 'true')
   completed?: boolean;
+
+  @IsOptional()
+  @IsEnum({ asc: 'asc', desc: 'desc' })
+  order?: 'asc' | 'desc';
 }

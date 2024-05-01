@@ -60,6 +60,7 @@ export class EventsService {
       endMonth,
       groupedByMonth,
       completed,
+      order = 'asc',
     } = query;
 
     const whereOptions: Prisma.EventWhereInput = {};
@@ -101,7 +102,7 @@ export class EventsService {
     const events = await this.prismaService.event.findMany({
       where: whereOptions,
       orderBy: {
-        datetime: 'asc',
+        datetime: order,
       },
       include: {
         images: {
