@@ -96,7 +96,6 @@ export class EventsController {
         title: { type: 'string' },
         datetime: { type: 'datetime', default: new Date() },
         location: { type: 'string' },
-        completed: { type: 'boolean' },
       },
     },
   })
