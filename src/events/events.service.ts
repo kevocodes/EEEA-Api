@@ -114,6 +114,13 @@ export class EventsService {
       },
     });
 
+    // Filter images based on the 'completed' status of each event
+    const processedEvents = events.map((event) => ({
+      ...event,
+      // If the event is not completed, we don't return the images
+      images: event.completed ? event.images : [],
+    }));
+
     /*-------------------------------
       groupByMonth query validation
       ------------------------------- */
@@ -127,7 +134,9 @@ export class EventsService {
       statusCode: HttpStatus.OK,
       data: {
         isGrouped: isGroupByMonth,
-        events: isGroupByMonth ? this.groupByMonth(events) : events,
+        events: isGroupByMonth
+          ? this.groupByMonth(processedEvents)
+          : processedEvents,
       },
       message: 'Events retrieved successfully',
     };
