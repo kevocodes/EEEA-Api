@@ -63,6 +63,8 @@ model EventImage {
   eventId   String   @db.ObjectId
   event     Event    @relation(fields: [eventId], references: [id])
   url       String
+  width     Int
+  height    Int
   public_id String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -270,11 +270,15 @@ export class EventsService {
       'events/images',
     );
 
+    console.log(uploads);
+
     const eventImages = await this.prismaService.eventImage.createMany({
       data: uploads.map((image) => ({
         eventId: id,
         url: image.secure_url,
         public_id: image.public_id,
+        width: image.width,
+        height: image.height,
       })),
     });
 
