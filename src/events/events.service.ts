@@ -160,6 +160,8 @@ export class EventsService {
           select: {
             id: true,
             url: true,
+            height: true,
+            width: true,
           },
         },
       },
