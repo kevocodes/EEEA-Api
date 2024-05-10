@@ -55,7 +55,7 @@ export class EventsService {
 
   async findAll(query: findAllEventsDto): Promise<ApiResponse> {
     const {
-      year = dayjs().year(),
+      year,
       startMonth,
       endMonth,
       groupedByMonth,
@@ -63,6 +63,8 @@ export class EventsService {
       order = 'asc',
     } = query;
 
+    console.log(year);
+    
     const whereOptions: Prisma.EventWhereInput = {};
 
     /*-----------------------------
@@ -75,21 +77,24 @@ export class EventsService {
     if (monthRangeProvided && !isValidMonthRange)
       throw new BadRequestException('Invalid month range');
 
-    // By default, we get all events for the year
-    let startOfYear = dayjs().year(year).startOf('year');
-    let endOfYear = dayjs().year(year).endOf('year');
+    // If the year query param is provided, we filter the events by year, otherwise we get all events
+    if (year) {
+      // By default, we get all events for the year
+      let startOfYear = dayjs().year(year).startOf('year');
+      let endOfYear = dayjs().year(year).endOf('year');
 
-    // If startMonth and endMonth query params are provided, we filter the events using the month range
-    if (monthRangeProvided) {
-      startOfYear = startOfYear.month(startMonth - 1).startOf('month');
-      endOfYear = endOfYear.month(endMonth - 1).endOf('month');
+      // If startMonth and endMonth query params are provided, we filter the events using the month range
+      if (monthRangeProvided) {
+        startOfYear = startOfYear.month(startMonth - 1).startOf('month');
+        endOfYear = endOfYear.month(endMonth - 1).endOf('month');
+      }
+
+      // Add the datetime range to the prisma whereOptions
+      whereOptions.datetime = {
+        gte: startOfYear.toDate(),
+        lte: endOfYear.toDate(),
+      };
     }
-
-    // Add the datetime range to the prisma whereOptions
-    whereOptions.datetime = {
-      gte: startOfYear.toDate(),
-      lte: endOfYear.toDate(),
-    };
 
     /*-----------------------------
       Status query validation
