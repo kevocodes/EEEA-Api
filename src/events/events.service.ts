@@ -63,8 +63,6 @@ export class EventsService {
       order = 'asc',
     } = query;
 
-    console.log(year);
-    
     const whereOptions: Prisma.EventWhereInput = {};
 
     /*-----------------------------
