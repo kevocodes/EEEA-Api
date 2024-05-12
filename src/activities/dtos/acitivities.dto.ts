@@ -23,7 +23,6 @@ export class CreateActivityDto {
   datetime: Date;
 
   @IsBoolean()
-  @Transform(({ value }) => value === 'true')
   isAllDay: boolean;
 }
 
