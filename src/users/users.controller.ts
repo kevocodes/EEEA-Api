@@ -28,7 +28,7 @@ import { TokenPayload } from 'src/auth/types/token.type';
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
-  @Post()
+  @Roles(Role.ADMIN)
   @ApiBody({
     schema: {
       type: 'object',
@@ -41,15 +41,18 @@ export class UsersController {
       },
     },
   })
+  @Post()
   async create(@Body() body: CreateUserDto): Promise<ApiResponse> {
     return this.userService.create(body);
   }
 
+  @Roles(Role.ADMIN)
   @Get()
   async findAll(@User() user: TokenPayload): Promise<ApiResponse> {
     return this.userService.findAll(user);
   }
 
+  @Roles(Role.ADMIN)
   @Get(':id')
   async findOneById(
     @Param('id', MongoIdPipe) id: string,
@@ -79,6 +82,7 @@ export class UsersController {
     return this.userService.updateOneById(id, body, user);
   }
 
+  @Roles(Role.ADMIN)
   @Delete(':id')
   async delete(@Param('id', MongoIdPipe) id: string): Promise<ApiResponse> {
     return this.userService.deleteOneById(id);

@@ -102,8 +102,16 @@ export class UsersService {
     userData: UpdateUserDto,
     currentUser: TokenPayload,
   ): Promise<ApiResponse> {
-    if (currentUser.role === Role.CONTENT_MANAGER && currentUser.sub !== id) {
+    const isAdmin = currentUser.role === Role.ADMIN;
+
+    // Check if not admin user is trying to update another user
+    if (!isAdmin && currentUser.sub !== id) {
       throw new BadRequestException('You can only update your own user');
+    }
+
+    // Check if not admin user is trying to update role
+    if (!isAdmin && userData.role) {
+      throw new BadRequestException('You cannot update your own role');
     }
 
     // Check if user exists
@@ -122,7 +130,7 @@ export class UsersService {
       });
 
       if (isEmailTaken) {
-        throw new ConflictException('This new email is already in use');
+        throw new ConflictException('The new email is already in use');
       }
     }
 
