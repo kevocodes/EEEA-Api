@@ -108,6 +108,14 @@ export class EventsService {
         datetime: order,
       },
       include: {
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            lastname: true,
+            email: true,
+          },
+        },
         images: {
           select: {
             id: true,
