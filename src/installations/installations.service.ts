@@ -17,11 +17,11 @@ export class InstallationsService {
   ) {}
 
   async create(
-    file: Express.Multer.File,
+    image: Express.Multer.File,
     data: CreateInstallationDto,
   ): Promise<ApiResponse> {
     const upload = await this.cloudinaryService.uploadFile(
-      file,
+      image,
       'installations',
     );
 
@@ -30,6 +30,8 @@ export class InstallationsService {
         name: data.name,
         public_id: upload.public_id,
         url: upload.secure_url,
+        width: upload.width,
+        height: upload.height,
       },
     });
 
@@ -69,7 +71,7 @@ export class InstallationsService {
   async update(
     id: string,
     data: UpdateInstallationDto,
-    file: Express.Multer.File,
+    image: Express.Multer.File,
   ): Promise<ApiResponse> {
     // Check if the installation exists
     const result = await this.findOne(id);
@@ -78,9 +80,9 @@ export class InstallationsService {
     const imageInfo: InstallationImageInfo = {};
 
     // If a new image is provided, upload the new image and delete the previous one
-    if (file) {
+    if (image) {
       const [upload] = await Promise.all([
-        this.cloudinaryService.uploadFile(file, 'installations'),
+        this.cloudinaryService.uploadFile(image, 'installations'),
         this.cloudinaryService.deleteFiles([currentInstallation.public_id]),
       ]);
 
@@ -124,6 +126,28 @@ export class InstallationsService {
     return {
       statusCode: 200,
       message: 'Installation deleted successfully',
+      data: null,
+    };
+  }
+
+  async deleteAll(): Promise<ApiResponse> {
+    // Delete all installations
+    const installations = await this.prismaService.installation.findMany();
+
+    // Get all public_ids
+    const publicIds = installations.map(
+      (installation) => installation.public_id,
+    );
+
+    // Delete all images in parallel
+    await Promise.all([
+      this.cloudinaryService.deleteFiles(publicIds),
+      this.prismaService.installation.deleteMany(),
+    ]);
+
+    return {
+      statusCode: 200,
+      message: 'All installations deleted successfully',
       data: null,
     };
   }

@@ -35,14 +35,14 @@ export class InstallationsController {
 
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.CONTENT_MANAGER)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('image'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
       type: 'object',
-      required: ['file', 'name'],
+      required: ['image', 'name'],
       properties: {
-        file: {
+        image: {
           type: 'string',
           format: 'binary',
         },
@@ -53,16 +53,23 @@ export class InstallationsController {
   @Post()
   async create(
     @UploadedFile(getParseImagePipe())
-    file: Express.Multer.File,
+    image: Express.Multer.File,
     @Body() body: CreateInstallationDto,
   ): Promise<ApiResponse> {
-    return this.installationsService.create(file, body);
+    return this.installationsService.create(image, body);
   }
 
   @Public()
   @Get()
   async findAll(): Promise<ApiResponse> {
     return this.installationsService.findAll();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.CONTENT_MANAGER)
+  @Delete('all')
+  async deleteAll(): Promise<ApiResponse> {
+    return this.installationsService.deleteAll();
   }
 
   @Public()
@@ -73,13 +80,13 @@ export class InstallationsController {
 
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.CONTENT_MANAGER)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('image'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        file: {
+        image: {
           type: 'string',
           format: 'binary',
         },
@@ -90,11 +97,11 @@ export class InstallationsController {
   @Put(':id')
   async update(
     @UploadedFile(getParseImagePipe({ required: false }))
-    file: Express.Multer.File,
+    image: Express.Multer.File,
     @Param('id', MongoIdPipe) id: string,
     @Body() body: UpdateInstallationDto,
   ): Promise<ApiResponse> {
-    return this.installationsService.update(id, body, file);
+    return this.installationsService.update(id, body, image);
   }
 
   @ApiBearerAuth()
