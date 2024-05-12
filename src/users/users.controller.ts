@@ -46,8 +46,8 @@ export class UsersController {
   }
 
   @Get()
-  async findAll(): Promise<ApiResponse> {
-    return this.userService.findAll();
+  async findAll(@User() user: TokenPayload): Promise<ApiResponse> {
+    return this.userService.findAll(user);
   }
 
   @Get(':id')

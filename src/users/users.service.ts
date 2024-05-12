@@ -57,11 +57,16 @@ export class UsersService {
     };
   }
 
-  async findAll(): Promise<ApiResponse> {
+  async findAll(user: TokenPayload): Promise<ApiResponse> {
     const users = await this.prismaService.user.findMany({
       select: prismaExclude('User', ['password']),
       orderBy: {
         createdAt: 'desc',
+      },
+      where: {
+        id: {
+          not: user.sub,
+        },
       },
     });
 
