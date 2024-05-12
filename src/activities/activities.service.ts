@@ -31,6 +31,7 @@ export class ActivitiesService {
       data: {
         title: data.title,
         datetime: data.datetime,
+        isAllDay: data.isAllDay,
         creatorId,
       },
     });
@@ -43,12 +44,7 @@ export class ActivitiesService {
   }
 
   async findAll(query: FindAllActivitiesDto): Promise<ApiResponse> {
-    const {
-      year = dayjs().year(),
-      startMonth,
-      endMonth,
-      groupedByMonth,
-    } = query;
+    const { year, startMonth, endMonth, groupedByMonth, order = 'asc' } = query;
 
     const whereOptions: Prisma.ActivityWhereInput = {};
 
@@ -62,26 +58,39 @@ export class ActivitiesService {
     if (monthRangeProvided && !isValidMonthRange)
       throw new BadRequestException('Invalid month range');
 
-    // By default, we get all activities for the year
-    let startOfYear = dayjs().year(year).startOf('year');
-    let endOfYear = dayjs().year(year).endOf('year');
+    // If the year query param is provided, we filter the activities by year, otherwise we get all events
+    if (year) {
+      // By default, we get all activities for the year
+      let startOfYear = dayjs().year(year).startOf('year');
+      let endOfYear = dayjs().year(year).endOf('year');
 
-    // If startMonth and endMonth query params are provided, we filter the activities using the month range
-    if (monthRangeProvided) {
-      startOfYear = startOfYear.month(startMonth - 1).startOf('month');
-      endOfYear = endOfYear.month(endMonth - 1).endOf('month');
+      // If startMonth and endMonth query params are provided, we filter the activities using the month range
+      if (monthRangeProvided) {
+        startOfYear = startOfYear.month(startMonth - 1).startOf('month');
+        endOfYear = endOfYear.month(endMonth - 1).endOf('month');
+      }
+
+      // Add the datetime range to the prisma whereOptions
+      whereOptions.datetime = {
+        gte: startOfYear.toDate(),
+        lte: endOfYear.toDate(),
+      };
     }
-
-    // Add the datetime range to the prisma whereOptions
-    whereOptions.datetime = {
-      gte: startOfYear.toDate(),
-      lte: endOfYear.toDate(),
-    };
 
     const activities = await this.prismaService.activity.findMany({
       where: whereOptions,
       orderBy: {
-        datetime: 'asc',
+        datetime: order,
+      },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            lastname: true,
+            email: true,
+          },
+        },
       },
     });
 
@@ -98,7 +107,7 @@ export class ActivitiesService {
       statusCode: HttpStatus.OK,
       data: {
         isGrouped: isGroupByMonth,
-        events: isGroupByMonth ? this.groupByMonth(activities) : activities,
+        activities: isGroupByMonth ? this.groupByMonth(activities) : activities,
       },
       message: 'Events retrieved successfully',
     };

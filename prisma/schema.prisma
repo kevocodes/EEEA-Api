@@ -31,6 +31,7 @@ model Activity {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   title     String
   datetime  DateTime
+  isAllDay  Boolean
   creatorId String   @db.ObjectId
   creator   User     @relation(fields: [creatorId], references: [id])
 

@@ -2,6 +2,7 @@ import { PartialType } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsEnum,
   IsISO8601,
   IsNotEmpty,
   IsOptional,
@@ -20,6 +21,10 @@ export class CreateActivityDto {
   @IsISO8601({ strict: true })
   @IsNotEmpty()
   datetime: Date;
+
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true')
+  isAllDay: boolean;
 }
 
 export class UpdateActivityDto extends PartialType(CreateActivityDto) {}
@@ -47,6 +52,10 @@ export class FindAllActivitiesDto {
   @IsOptional()
   @Transform(({ value }) => value === 'true')
   groupedByMonth?: boolean;
+
+  @IsOptional()
+  @IsEnum({ asc: 'asc', desc: 'desc' })
+  order?: 'asc' | 'desc';
 }
 
 export class FindAllActivitiesByMonthDto {
