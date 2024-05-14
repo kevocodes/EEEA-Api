@@ -18,6 +18,7 @@ import { Express } from 'express';
 import * as dayjs from 'dayjs';
 import { CloudinaryService } from 'src/config/cloudinary/cloudinary.service';
 import { EventImageInfo } from './types/events.types';
+import { TokenPayload } from 'src/auth/types/token.type';
 
 @Injectable()
 export class EventsService {
@@ -29,7 +30,7 @@ export class EventsService {
   async create(
     data: CreateEventDto,
     file: Express.Multer.File,
-    creatorId: string,
+    creator: TokenPayload,
   ): Promise<ApiResponse> {
     const isInvalidDate = dayjs(data.datetime).isBefore(dayjs());
 
@@ -43,7 +44,7 @@ export class EventsService {
         ...data,
         thumbnail: upload.secure_url,
         public_id: upload.public_id,
-        creatorId,
+        creator: creator.fullname,
       },
     });
 
@@ -109,14 +110,6 @@ export class EventsService {
         datetime: order,
       },
       include: {
-        creator: {
-          select: {
-            id: true,
-            name: true,
-            lastname: true,
-            email: true,
-          },
-        },
         images: {
           select: {
             id: true,
@@ -160,14 +153,6 @@ export class EventsService {
         id,
       },
       include: {
-        creator: {
-          select: {
-            id: true,
-            name: true,
-            lastname: true,
-            email: true,
-          },
-        },
         images: {
           select: {
             id: true,
@@ -189,7 +174,7 @@ export class EventsService {
   }
 
   async update(
-    creatorId: string,
+    creator: TokenPayload,
     eventId: string,
     data: UpdateEventDto,
     file: Express.Multer.File,
@@ -227,7 +212,7 @@ export class EventsService {
       data: {
         ...data,
         ...imageInfo,
-        creatorId,
+        creator: creator.fullname,
       },
     });
 

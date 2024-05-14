@@ -66,7 +66,7 @@ export class EventsController {
     @UploadedFile(getParseImagePipe())
     file: Express.Multer.File,
   ): Promise<ApiResponse> {
-    return this.eventService.create(body, file, user.sub);
+    return this.eventService.create(body, file, user);
   }
 
   @Public()
@@ -107,7 +107,7 @@ export class EventsController {
     @Param('id', MongoIdPipe) id: string,
     @Body() body: UpdateEventDto,
   ): Promise<ApiResponse> {
-    return this.eventService.update(user.sub, id, body, file);
+    return this.eventService.update(user, id, body, file);
   }
 
   @ApiBearerAuth()

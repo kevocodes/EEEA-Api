@@ -4,4 +4,5 @@ export type TokenPayload = {
   sub: string;
   email: string;
   role: Role;
+  fullname: string;
 };

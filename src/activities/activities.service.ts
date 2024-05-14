@@ -13,6 +13,7 @@ import {
 import { ApiResponse } from 'src/common/types/response.type';
 import * as dayjs from 'dayjs';
 import { Activity, Prisma } from '@prisma/client';
+import { TokenPayload } from 'src/auth/types/token.type';
 
 @Injectable()
 export class ActivitiesService {
@@ -20,7 +21,7 @@ export class ActivitiesService {
 
   async create(
     data: CreateActivityDto,
-    creatorId: string,
+    creator: TokenPayload,
   ): Promise<ApiResponse> {
     const isInvalidDate = dayjs(data.datetime).isBefore(dayjs());
 
@@ -32,7 +33,7 @@ export class ActivitiesService {
         title: data.title,
         datetime: data.datetime,
         isAllDay: data.isAllDay,
-        creatorId,
+        creator: creator.fullname,
       },
     });
 
@@ -81,16 +82,6 @@ export class ActivitiesService {
       where: whereOptions,
       orderBy: {
         datetime: order,
-      },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            name: true,
-            lastname: true,
-            email: true,
-          },
-        },
       },
     });
 
@@ -142,16 +133,6 @@ export class ActivitiesService {
       where: {
         id,
       },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            name: true,
-            lastname: true,
-            email: true,
-          },
-        },
-      },
     });
 
     if (!activity) throw new NotFoundException('Activity not found');
@@ -164,7 +145,7 @@ export class ActivitiesService {
   }
 
   async update(
-    creatorId: string,
+    creator: TokenPayload,
     eventId: string,
     data: UpdateActivityDto,
   ): Promise<ApiResponse> {
@@ -184,7 +165,7 @@ export class ActivitiesService {
       },
       data: {
         ...data,
-        creatorId,
+        creator: creator.fullname,
       },
     });
 

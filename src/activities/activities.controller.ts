@@ -40,7 +40,7 @@ export class ActivitiesController {
     @User() user: TokenPayload,
     @Body() body: CreateActivityDto,
   ): Promise<ApiResponse> {
-    return this.activityService.create(body, user.sub);
+    return this.activityService.create(body, user);
   }
 
   @Public()
@@ -71,7 +71,7 @@ export class ActivitiesController {
     @Param('id', MongoIdPipe) id: string,
     @Body() body: UpdateActivityDto,
   ): Promise<ApiResponse> {
-    return this.activityService.update(user.sub, id, body);
+    return this.activityService.update(user, id, body);
   }
 
   @ApiBearerAuth()
