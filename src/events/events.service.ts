@@ -1,10 +1,11 @@
 import {
   BadRequestException,
+  ConflictException,
   HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Event, Prisma } from '@prisma/client';
+import { Event, EventImage, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/config/prisma/prisma.service';
 import {
   CreateEventDto,
@@ -261,7 +262,10 @@ export class EventsService {
   async delete(id: string): Promise<ApiResponse> {
     // Check if the event exists
     const event = await this.findOne(id);
-    const data = event.data as Event;
+    const data = event.data as Event & { images: EventImage[] };
+
+    if (data.images.length > 0)
+      throw new ConflictException('Delete images first');
 
     await Promise.all([
       this.cloudinaryService.deleteFiles([data.public_id]),
