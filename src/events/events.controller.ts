@@ -101,12 +101,13 @@ export class EventsController {
   })
   @Put(':id')
   async update(
+    @User() user: TokenPayload,
     @UploadedFile(getParseImagePipe({ required: false }))
     file: Express.Multer.File,
     @Param('id', MongoIdPipe) id: string,
     @Body() body: UpdateEventDto,
   ): Promise<ApiResponse> {
-    return this.eventService.update(id, body, file);
+    return this.eventService.update(user.sub, id, body, file);
   }
 
   @ApiBearerAuth()

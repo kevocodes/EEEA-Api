@@ -11,7 +11,10 @@ export class CloudinaryService {
     file: Express.Multer.File,
     folder: string,
   ): Promise<CloudinaryResponse> {
-    const webpBuffer = await sharp(file.buffer).webp().toBuffer();
+    const webpBuffer = await sharp(file.buffer)
+      .webp({ quality: 75 })
+      .rotate()
+      .toBuffer();
 
     return new Promise<CloudinaryResponse>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(

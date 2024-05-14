@@ -188,12 +188,13 @@ export class EventsService {
   }
 
   async update(
-    id: string,
+    creatorId: string,
+    eventId: string,
     data: UpdateEventDto,
     file: Express.Multer.File,
   ): Promise<ApiResponse> {
     // Check if the event exists
-    const result = await this.findOne(id);
+    const result = await this.findOne(eventId);
 
     const currentEvent: Event = result.data;
     const imageInfo: EventImageInfo = {};
@@ -220,11 +221,12 @@ export class EventsService {
 
     const updatedEvent = await this.prismaService.event.update({
       where: {
-        id,
+        id: eventId,
       },
       data: {
         ...data,
         ...imageInfo,
+        creatorId,
       },
     });
 

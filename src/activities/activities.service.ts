@@ -163,9 +163,13 @@ export class ActivitiesService {
     };
   }
 
-  async update(id: string, data: UpdateActivityDto): Promise<ApiResponse> {
+  async update(
+    creatorId: string,
+    eventId: string,
+    data: UpdateActivityDto,
+  ): Promise<ApiResponse> {
     // Check if the activity exists
-    await this.findOne(id);
+    await this.findOne(eventId);
 
     if (data.datetime) {
       const isInvalidDate = dayjs(data.datetime).isBefore(dayjs());
@@ -176,9 +180,12 @@ export class ActivitiesService {
 
     const activity = await this.prismaService.activity.update({
       where: {
-        id,
+        id: eventId,
       },
-      data,
+      data: {
+        ...data,
+        creatorId,
+      },
     });
 
     return {

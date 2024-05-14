@@ -67,10 +67,11 @@ export class ActivitiesController {
   @Roles(Role.ADMIN, Role.CONTENT_MANAGER)
   @Put(':id')
   async update(
+    @User() user: TokenPayload,
     @Param('id', MongoIdPipe) id: string,
     @Body() body: UpdateActivityDto,
   ): Promise<ApiResponse> {
-    return this.activityService.update(id, body);
+    return this.activityService.update(user.sub, id, body);
   }
 
   @ApiBearerAuth()

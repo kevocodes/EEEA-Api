@@ -12,7 +12,7 @@ interface ParseImagePipeOptions {
 
 export function getParseImagePipe({
   required = true,
-  maxSize = 1.7,
+  maxSize = 4,
 }: ParseImagePipeOptions = {}): ParseFilePipe {
   return new ParseFilePipeBuilder()
     .addFileTypeValidator({
