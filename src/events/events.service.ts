@@ -14,7 +14,6 @@ import {
   findAllEventsDto,
 } from './dtos/events.dto';
 import { ApiResponse } from 'src/common/types/response.type';
-import { Express } from 'express';
 import * as dayjs from 'dayjs';
 import { CloudinaryService } from 'src/config/cloudinary/cloudinary.service';
 import { EventImageInfo } from './types/events.types';
@@ -32,11 +31,6 @@ export class EventsService {
     file: Express.Multer.File,
     creator: TokenPayload,
   ): Promise<ApiResponse> {
-    const isInvalidDate = dayjs(data.datetime).isBefore(dayjs());
-
-    if (isInvalidDate)
-      throw new BadRequestException('The date must be in the future');
-
     const upload = await this.cloudinaryService.uploadFile(file, 'events');
 
     const event = await this.prismaService.event.create({
@@ -184,14 +178,6 @@ export class EventsService {
 
     const currentEvent: Event = result.data;
     const imageInfo: EventImageInfo = {};
-
-    // Check if the date is in the future
-    if (data.datetime) {
-      const isInvalidDate = dayjs(data.datetime).isBefore(dayjs());
-
-      if (isInvalidDate)
-        throw new BadRequestException('The date must be in the future');
-    }
 
     // If a new thumbnail is provided, we upload the new image and delete the previous one
     if (file) {
