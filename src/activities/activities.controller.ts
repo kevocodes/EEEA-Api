@@ -26,10 +26,11 @@ import {
 import { ApiResponse } from 'src/common/types/response.type';
 import { Public } from 'src/common/decorators/public.decorator';
 import { MongoIdPipe } from 'src/common/pipes/mongo-id.pipe';
+import { EmailVerifiedGuard } from 'src/common/guards/emailVerified.guard';
 
 @ApiTags('activities')
 @Controller('activities')
-@UseGuards(JwtAuthGuard, RolesGuardGuard)
+@UseGuards(JwtAuthGuard, RolesGuardGuard, EmailVerifiedGuard)
 export class ActivitiesController {
   constructor(private readonly activityService: ActivitiesService) {}
 

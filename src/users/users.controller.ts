@@ -19,10 +19,11 @@ import { Role } from '@prisma/client';
 import { RolesGuardGuard } from 'src/common/guards/roles-guard.guard';
 import { User } from 'src/common/decorators/current-user.decorator';
 import { TokenPayload } from 'src/auth/types/token.type';
+import { EmailVerifiedGuard } from 'src/common/guards/emailVerified.guard';
 
 @ApiTags('users')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuardGuard)
+@UseGuards(JwtAuthGuard, RolesGuardGuard, EmailVerifiedGuard)
 @Roles(Role.ADMIN)
 @Controller('users')
 export class UsersController {

@@ -33,9 +33,10 @@ import { MongoIdPipe } from 'src/common/pipes/mongo-id.pipe';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
 import { getParseImagePipe } from 'src/common/utils/get-parse-file-pipe';
+import { EmailVerifiedGuard } from 'src/common/guards/emailVerified.guard';
 
 @ApiTags('events')
-@UseGuards(JwtAuthGuard, RolesGuardGuard)
+@UseGuards(JwtAuthGuard, RolesGuardGuard, EmailVerifiedGuard)
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventService: EventsService) {}

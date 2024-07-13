@@ -26,10 +26,11 @@ import { MongoIdPipe } from 'src/common/pipes/mongo-id.pipe';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
 import { getParseImagePipe } from 'src/common/utils/get-parse-file-pipe';
+import { EmailVerifiedGuard } from 'src/common/guards/emailVerified.guard';
 
 @ApiTags('installations')
 @Controller('installations')
-@UseGuards(JwtAuthGuard, RolesGuardGuard)
+@UseGuards(JwtAuthGuard, RolesGuardGuard, EmailVerifiedGuard)
 export class InstallationsController {
   constructor(private readonly installationsService: InstallationsService) {}
 
