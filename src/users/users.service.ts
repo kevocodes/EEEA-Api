@@ -193,6 +193,16 @@ export class UsersService {
     return user;
   }
 
+  async findOneByResetPasswordToken(token: string): Promise<User> {
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        resetPasswordToken: token,
+      },
+    });
+
+    return user;
+  }
+
   async saveVerifyOTP(
     userId: string,
     otp: string,
@@ -209,6 +219,17 @@ export class UsersService {
     });
   }
 
+  async saveForgotPasswordToken(email: string, token: string) {
+    await this.prismaService.user.update({
+      where: {
+        email: email,
+      },
+      data: {
+        resetPasswordToken: token,
+      },
+    });
+  }
+
   async verifyEmail(user: User): Promise<void> {
     await this.prismaService.user.update({
       where: {
@@ -218,6 +239,23 @@ export class UsersService {
         emailVerified: true,
         emailVerificationOTP: null,
         emailVerificationExpires: null,
+      },
+    });
+  }
+
+  async changePassword(user: User, newPassword: string): Promise<void> {
+    const hashedPassword = await bcrypt.hash(
+      newPassword,
+      this.config.hash.rounds,
+    );
+
+    await this.prismaService.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        password: hashedPassword,
+        resetPasswordToken: null,
       },
     });
   }

@@ -3,6 +3,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -108,6 +109,32 @@ export class AuthService {
     };
   }
 
+  async sendForgotPasswordEmail(email: string): Promise<ApiResponse> {
+    const user = await this.userService.findOneByEmail(email);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const token = await this.generatePasswordJWT(email);
+    const expiresAt = this.getTokenExpirationIsoDate(token);
+
+    await this.userService.saveForgotPasswordToken(email, token);
+
+    await this.mailService.sendForgotPasswordEmail(
+      user.name,
+      user.email,
+      expiresAt,
+      token,
+    );
+
+    return {
+      statusCode: 200,
+      message: 'Forgot password email sent',
+      data: null,
+    };
+  }
+
   async verifyEmail(user: TokenPayload, otp: string): Promise<ApiResponse> {
     const response = await this.userService.findOneById(user.sub);
     const currentUser = response.data as User;
@@ -132,7 +159,78 @@ export class AuthService {
     };
   }
 
+  async verifyForgotPasswordToken(token: string): Promise<ApiResponse> {
+    const user = await this.userService.findOneByResetPasswordToken(token);
+
+    if (!user) {
+      throw new NotFoundException('This token does not belong to any user');
+    }
+
+    await this.validateJWT(token);
+
+    return {
+      statusCode: 200,
+      message: 'Token verified',
+      data: null,
+    };
+  }
+
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<ApiResponse> {
+    const user = await this.userService.findOneByResetPasswordToken(token);
+
+    if (!user) {
+      throw new NotFoundException('This token does not belong to any user');
+    }
+
+    await this.validateJWT(token);
+
+    await this.userService.changePassword(user, newPassword);
+
+    return {
+      statusCode: 200,
+      message: 'Password updated successfully',
+      data: null,
+    };
+  }
+
+  // --------------------
+  // Helper functions
+  // --------------------
   generateOTP() {
     return Math.floor(100000 + Math.random() * 900000);
+  }
+
+  generatePasswordJWT(email: string): Promise<string> {
+    const minutes = this.envConfiguration.forgotPassword.expiresIn;
+
+    return this.jwtService.signAsync(
+      { sub: email },
+      {
+        expiresIn: `${minutes}m`,
+      },
+    );
+  }
+
+  async validateJWT(token: string): Promise<void> {
+    try {
+      await this.jwtService.verifyAsync(token);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
+
+  getTokenExpirationIsoDate(token: string): string {
+    try {
+      const { exp } = this.jwtService.verify(token);
+
+      return dayjs.unix(exp).toISOString();
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error getting token expiration date',
+      );
+    }
   }
 }

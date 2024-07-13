@@ -4,6 +4,8 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -16,6 +18,7 @@ import { TokenPayload } from './types/token.type';
 import { User } from 'src/common/decorators/current-user.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { OtpDto } from './dto/otp.dto';
+import { ChangePasswordDto, ForgotPasswordDto } from './dto/forgotPassword.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -36,6 +39,31 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   getProfile(@User() user: TokenPayload): Promise<ApiResponse> {
     return this.userService.findOneById(user.sub);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return await this.authService.sendForgotPasswordEmail(
+      forgotPasswordDto.email,
+    );
+  }
+
+  @Get('verify-forgot-password-token/:token')
+  async verifyForgotPasswordToken(
+    @Param('token') token: string,
+  ): Promise<ApiResponse> {
+    return await this.authService.verifyForgotPasswordToken(token);
+  }
+
+  @Patch('reset-password/:token')
+  async resetPassword(
+    @Param('token') token: string,
+    @Body() resetPasswordDto: ChangePasswordDto,
+  ): Promise<ApiResponse> {
+    return await this.authService.resetPassword(
+      token,
+      resetPasswordDto.password,
+    );
   }
 
   @Post('send-verification-email')

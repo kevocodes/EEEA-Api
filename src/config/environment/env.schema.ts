@@ -22,4 +22,6 @@ export default Joi.object({
   CLOUDINARY_API_SECRET: Joi.string().required(),
   CLOUDINARY_FOLDER: Joi.string().required(),
   OTPS_EXPIRES_IN: Joi.number().required(),
+  FORGOT_PASSWORD_PAGE: Joi.string().required(),
+  FORGOT_PASSWORD_TOKEN_EXPIRES_IN: Joi.number().required(),
 });

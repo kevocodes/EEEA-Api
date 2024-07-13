@@ -44,4 +44,8 @@ export default registerAs('env', () => ({
   OTP: {
     expiresIn: parseInt(process.env.OTPS_EXPIRES_IN, 10),
   },
+  forgotPassword: {
+    page: process.env.FORGOT_PASSWORD_PAGE,
+    expiresIn: parseInt(process.env.FORGOT_PASSWORD_TOKEN_EXPIRES_IN, 10),
+  },
 }));

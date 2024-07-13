@@ -4,7 +4,7 @@ import { ContactUsDto } from './dtos/contact-us.dto';
 import { Injectable, Inject } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import envConfig from 'src/config/environment/env.config';
-
+import * as dayjs from 'dayjs';
 @Injectable()
 export class MailService {
   constructor(
@@ -42,6 +42,25 @@ export class MailService {
       context: {
         otp,
         name,
+      },
+    });
+  }
+
+  async sendForgotPasswordEmail(
+    name: string,
+    email: string,
+    expiresAt: string,
+    token: string,
+  ) {
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Recupera tu contraseña',
+      template: './forgot-password',
+      context: {
+        expiresAt: dayjs(expiresAt).format('DD/MM/YYYY HH:mm:ss'),
+        token,
+        name,
+        forgotPage: this.configService.forgotPassword.page,
       },
     });
   }
