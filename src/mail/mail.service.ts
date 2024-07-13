@@ -33,4 +33,16 @@ export class MailService {
       data: null,
     };
   }
+
+  async sendVerificationEmail(name: string, email: string, otp: string) {
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Verifica tu cuenta',
+      template: './verify-email',
+      context: {
+        otp,
+        name,
+      },
+    });
+  }
 }

@@ -192,4 +192,33 @@ export class UsersService {
 
     return user;
   }
+
+  async saveVerifyOTP(
+    userId: string,
+    otp: string,
+    expiresAt: Date,
+  ): Promise<void> {
+    await this.prismaService.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        emailVerificationOTP: otp,
+        emailVerificationExpires: expiresAt,
+      },
+    });
+  }
+
+  async verifyEmail(user: User): Promise<void> {
+    await this.prismaService.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        emailVerified: true,
+        emailVerificationOTP: null,
+        emailVerificationExpires: null,
+      },
+    });
+  }
 }

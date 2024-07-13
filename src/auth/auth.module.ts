@@ -8,9 +8,11 @@ import { AuthService } from './auth.service';
 import { UsersModule } from 'src/users/users.module';
 import envConfig from 'src/config/environment/env.config';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
+    MailModule,
     UsersModule,
     PassportModule,
     JwtModule.registerAsync({

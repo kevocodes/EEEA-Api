@@ -36,5 +36,6 @@ import { ConfigType } from '@nestjs/config';
   ],
   providers: [MailService],
   controllers: [MailController],
+  exports: [MailService],
 })
 export class MailModule {}

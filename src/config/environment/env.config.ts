@@ -41,4 +41,7 @@ export default registerAs('env', () => ({
     apiSecret: process.env.CLOUDINARY_API_SECRET,
     folder: process.env.CLOUDINARY_FOLDER,
   },
+  OTP: {
+    expiresIn: parseInt(process.env.OTPS_EXPIRES_IN, 10),
+  },
 }));
