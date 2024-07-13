@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Inject,
   Injectable,
   NotFoundException,
@@ -75,6 +76,19 @@ export class AuthService {
       throw new BadRequestException('Email already verified');
     }
 
+    if (
+      currentUser.emailVerificationOTP &&
+      currentUser.emailVerificationExpires
+    ) {
+      const expiresAt = currentUser.emailVerificationExpires;
+
+      if (dayjs().isBefore(expiresAt)) {
+        throw new ConflictException(
+          `OTP already sent and expires at: ${expiresAt.toISOString()}`,
+        );
+      }
+    }
+
     const otp = String(this.generateOTP());
     const duration = this.envConfiguration.OTP.expiresIn;
     const expiresAt = dayjs().add(duration, 'minutes').toDate();
@@ -90,7 +104,7 @@ export class AuthService {
     return {
       statusCode: 200,
       message: 'Verification email sent',
-      data: null,
+      data: { expiresAt },
     };
   }
 
