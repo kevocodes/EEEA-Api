@@ -103,6 +103,8 @@ export class UsersService {
     currentUser: TokenPayload,
   ): Promise<ApiResponse> {
     const isAdmin = currentUser.role === Role.ADMIN;
+    const needsToReverifyEmail =
+      userData.email && userData.email !== currentUser.email;
 
     // Check if not admin user is trying to update another user
     if (!isAdmin && currentUser.sub !== id) {
@@ -147,7 +149,10 @@ export class UsersService {
       where: {
         id,
       },
-      data: userData,
+      data: {
+        ...userData,
+        emailVerified: needsToReverifyEmail ? false : true,
+      },
     });
 
     delete updatedUser.password;
@@ -187,6 +192,16 @@ export class UsersService {
     const user = await this.prismaService.user.findUnique({
       where: {
         email,
+      },
+    });
+
+    return user;
+  }
+
+  async findOneBySub(id: string): Promise<User> {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id,
       },
     });
 

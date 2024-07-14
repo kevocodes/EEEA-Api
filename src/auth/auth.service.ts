@@ -67,7 +67,7 @@ export class AuthService {
   }
 
   async sendVerificationEmail(user: TokenPayload): Promise<ApiResponse> {
-    const currentUser = await this.userService.findOneByEmail(user.email);
+    const currentUser = await this.userService.findOneBySub(user.sub);
 
     if (!currentUser) {
       throw new NotFoundException('User not found');
@@ -92,14 +92,19 @@ export class AuthService {
 
     const otp = String(this.generateOTP());
     const duration = this.envConfiguration.OTP.expiresIn;
-    const expiresAt = dayjs().add(duration, 'minutes').toDate();
+    const expiresAt = dayjs().add(duration, 'minutes');
 
-    await this.userService.saveVerifyOTP(currentUser.id, otp, expiresAt);
+    await this.userService.saveVerifyOTP(
+      currentUser.id,
+      otp,
+      expiresAt.toDate(),
+    );
 
     await this.mailService.sendVerificationEmail(
       currentUser.name,
       currentUser.email,
       otp,
+      expiresAt.format('DD/MM/YYYY HH:mm:ss'),
     );
 
     return {

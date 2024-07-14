@@ -34,7 +34,12 @@ export class MailService {
     };
   }
 
-  async sendVerificationEmail(name: string, email: string, otp: string) {
+  async sendVerificationEmail(
+    name: string,
+    email: string,
+    otp: string,
+    expiresAt: string,
+  ) {
     await this.mailerService.sendMail({
       to: email,
       subject: 'Verifica tu cuenta',
@@ -42,6 +47,7 @@ export class MailService {
       context: {
         otp,
         name,
+        expiresAt,
       },
     });
   }
