@@ -102,9 +102,12 @@ export class UsersService {
     userData: UpdateUserDto,
     currentUser: TokenPayload,
   ): Promise<ApiResponse> {
+    const { email: currentEmail } = await this.findOneBySub(currentUser.sub);
+
     const isAdmin = currentUser.role === Role.ADMIN;
+
     const needsToReverifyEmail =
-      userData.email && userData.email !== currentUser.email;
+      userData.email && userData.email !== currentEmail;
 
     // Check if not admin user is trying to update another user
     if (!isAdmin && currentUser.sub !== id) {
