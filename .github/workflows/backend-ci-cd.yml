@@ -25,16 +25,16 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: yarn
+        run: npm ci
 
       - name: Run linter
-        run: yarn run lint
+        run: npm run lint
 
       - name: Run unit tests
-        run: yarn run test
+        run: npm run test
 
       - name: Run test coverage
-        run: yarn run test:cov > coverage-summary.txt
+        run: npm run test:cov > coverage-summary.txt
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
@@ -58,7 +58,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: yarn install
+        run: npm ci
 
       - name: Create prod env file
         run: echo "$ENV_FILE" > .env
