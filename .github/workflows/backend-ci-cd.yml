@@ -70,22 +70,18 @@ jobs:
 
             PROJECT_DIR="/home/${{ secrets.SSH_USER }}/backend"
 
-            echo "Clonando o actualizando el proyecto..."
-
             if [ ! -d "\$PROJECT_DIR" ]; then
               git clone https://github.com/${{ github.repository }} \$PROJECT_DIR
             else
               cd \$PROJECT_DIR
               git fetch origin
               git reset --hard origin/${{ github.ref_name }}
-            fi  
+            fi
 
             cd \$PROJECT_DIR
 
             echo "Escribiendo archivo .env..."
-            cat > .env << EOL
-              ${{ secrets.ENV_API }}
-            EOL
+            printf "%s\n" "${{ secrets.ENV_API }}" > .env
 
             echo "Instalando dependencias..."
             yarn install
@@ -100,4 +96,4 @@ jobs:
 
             echo "Contenedores activos:"
             docker ps
-            EOF
+      EOF
