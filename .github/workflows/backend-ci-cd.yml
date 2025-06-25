@@ -21,20 +21,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: yarn
 
       - name: Run linter
-        run: npm run lint
+        run: yarn run lint
 
       - name: Run unit tests
-        run: npm run test
+        run: yarn run test
 
       - name: Run test coverage
-        run: npm run test:cov > coverage-summary.txt
+        run: yarn run test:cov > coverage-summary.txt
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
@@ -54,16 +54,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: yarn install
 
       - name: Create prod env file
         run: echo "$ENV_FILE" > .env
         env:
-          ENV_FILE: ${{ secrets.ENV_FILE }}
+          ENV_FILE: ${{ secrets.ENV_API }}
 
       - name: Build and deploy with Docker
         run: |
