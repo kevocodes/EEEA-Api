@@ -65,7 +65,9 @@ jobs:
 
       - name: SSH and deploy
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+          ENV_FILE_CONTENT=$(echo "${{ secrets.ENV_API }}" | base64)
+
+          ssh -o StrictHostKeyChecking=no -T ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             set -e
 
             PROJECT_DIR="/home/${{ secrets.SSH_USER }}/backend"
@@ -81,7 +83,7 @@ jobs:
             cd \$PROJECT_DIR
 
             echo "Escribiendo archivo .env..."
-            echo "${{ secrets.ENV_API }}" > .env
+            echo "$ENV_FILE_CONTENT" | base64 --decode > .env
 
             echo "Instalando dependencias..."
             yarn install
