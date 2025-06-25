@@ -1,0 +1,86 @@
+name: Backend CI/CD
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  # ================================
+  # 🧪 Job de Test y Linter
+  # ================================
+  test-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Run linter
+        run: yarn run lint
+
+      - name: Run unit tests
+        run: yarn run test
+
+      - name: Run test coverage
+        run: yarn run test:cov > coverage-summary.txt
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary
+          path: coverage-summary.txt
+
+  # ================================
+  # 🚀 Job de Despliegue por SSH
+  # ================================
+  deploy:
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    needs: test-lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy .env to server
+        run: |
+          echo "${{ secrets.ENV_API }}" > .env
+          scp .env ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/backend/.env
+
+      - name: SSH and deploy
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd /home/${{ secrets.SSH_USER }}/backend
+
+            echo "Instalando dependencias..."
+            yarn install
+
+            echo "Ejecutando tests..."
+            yarn run test
+            yarn run test:cov > coverage-summary.txt
+
+            echo "Levantando contenedor..."
+            docker compose down
+            docker compose up -d --build
+          EOF
