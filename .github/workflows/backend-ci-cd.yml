@@ -11,20 +11,12 @@ on:
       - develop
 
 jobs:
-  # ================================
-  # 🧪 Job de Test y Linter
-  # ================================
   test-lint:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-
-      - name: Set up Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
 
       - name: Install dependencies
         run: yarn install
@@ -32,7 +24,7 @@ jobs:
       - name: Run linter
         run: yarn run lint
 
-      - name: Run unit tests
+      - name: Run tests
         run: yarn run test
 
       - name: Run test coverage
@@ -44,58 +36,22 @@ jobs:
           name: coverage-summary
           path: coverage-summary.txt
 
-  # ================================
-  # 🚀 Job de Despliegue por SSH
-  # ================================
   deploy:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     needs: test-lint
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Setup SSH key
+      - name: Create .env
+        run: echo "${{ secrets.ENV_API }}" > .env
+
+      - name: Build and deploy with Docker
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          docker compose down || true
+          docker compose up -d --build
 
-      - name: SSH and deploy
-        run: |
-          ENV_FILE_CONTENT=$(echo "${{ secrets.ENV_API }}" | base64)
-
-          ssh -o StrictHostKeyChecking=no -T ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
-            set -e
-
-            PROJECT_DIR="/home/${{ secrets.SSH_USER }}/backend"
-
-            if [ ! -d "\$PROJECT_DIR" ]; then
-              git clone https://github.com/${{ github.repository }} \$PROJECT_DIR
-            else
-              cd \$PROJECT_DIR
-              git fetch origin
-              git reset --hard origin/${{ github.ref_name }}
-            fi
-
-            cd \$PROJECT_DIR
-
-            echo "Escribiendo archivo .env..."
-            echo "$ENV_FILE_CONTENT" | base64 --decode > .env
-
-            echo "Instalando dependencias..."
-            yarn install
-
-            echo "Ejecutando tests..."
-            yarn run test
-            yarn run test:cov > coverage-summary.txt
-
-            echo "Levantando contenedor..."
-            docker compose down || true
-            docker compose up -d --build
-
-            echo "Contenedores activos:"
-            docker ps
-          EOF
+      - name: Show containers
+        run: docker ps
