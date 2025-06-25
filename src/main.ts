@@ -20,7 +20,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('Escuela de educación especial - API')
+    .setTitle('Escuela de educación especial - API (MODIFICADO ACA)')
     .setDescription(
       'API para la gestión de los sistemas de la escuela de educación especial.',
     )
