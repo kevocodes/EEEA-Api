@@ -60,8 +60,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Create .env file
-        run: echo "${{ secrets.ENV_API }}" > .env
+      - name: Create prod env file
+        run: echo "$ENV_FILE" > .env
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
 
       - name: Build and deploy with Docker
         run: |
