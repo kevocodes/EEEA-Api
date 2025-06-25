@@ -18,13 +18,22 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'yarn'
+
+      - name: Enable Yarn (via Corepack)
+        run: corepack enable
+
       - name: Install dependencies
         run: yarn install
 
       - name: Run linter
         run: yarn run lint
 
-      - name: Run tests
+      - name: Run unit tests
         run: yarn run test
 
       - name: Run test coverage
@@ -45,7 +54,16 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Create .env
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'yarn'
+
+      - name: Enable Yarn (via Corepack)
+        run: corepack enable
+
+      - name: Create .env file
         run: echo "${{ secrets.ENV_API }}" > .env
 
       - name: Build and deploy with Docker
@@ -53,7 +71,5 @@ jobs:
           docker compose down || true
           docker compose up -d --build
 
-      - name: Show containers
+      - name: Show running containers
         run: docker ps
-
-        
