@@ -65,12 +65,26 @@ jobs:
 
       - name: SSH and deploy
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd /home/${{ secrets.SSH_USER }}/backend
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+            set -e
+
+            PROJECT_DIR="/home/${{ secrets.SSH_USER }}/backend"
+
+            echo "Clonando o actualizando el proyecto..."
+
+            if [ ! -d "\$PROJECT_DIR" ]; then
+              git clone https://github.com/${{ github.repository }} \$PROJECT_DIR
+            else
+              cd \$PROJECT_DIR
+              git fetch origin
+              git reset --hard origin/${{ github.ref_name }}
+            fi  
+
+            cd \$PROJECT_DIR
 
             echo "Escribiendo archivo .env..."
             cat > .env << EOL
-            ${{ secrets.ENV_API }}
+              ${{ secrets.ENV_API }}
             EOL
 
             echo "Instalando dependencias..."
@@ -81,6 +95,9 @@ jobs:
             yarn run test:cov > coverage-summary.txt
 
             echo "Levantando contenedor..."
-            docker compose down
+            docker compose down || true
             docker compose up -d --build
-          EOF
+
+            echo "Contenedores activos:"
+            docker ps
+            EOF
