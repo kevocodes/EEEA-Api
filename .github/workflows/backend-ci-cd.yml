@@ -63,15 +63,15 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Copy .env to server
-        run: |
-          echo "${{ secrets.ENV_API }}" > .env
-          scp .env ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/backend/.env
-
       - name: SSH and deploy
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd /home/${{ secrets.SSH_USER }}/backend
+
+            echo "Escribiendo archivo .env..."
+            cat > .env << EOL
+            ${{ secrets.ENV_API }}
+            EOL
 
             echo "Instalando dependencias..."
             yarn install
