@@ -81,7 +81,7 @@ jobs:
             cd \$PROJECT_DIR
 
             echo "Escribiendo archivo .env..."
-            printf "%s\n" "${{ secrets.ENV_API }}" > .env
+            echo "${{ secrets.ENV_API }}" > .env
 
             echo "Instalando dependencias..."
             yarn install
